@@ -55,14 +55,16 @@ python3 ~/.config/opencode/scripts/render_diagram.py \
   --format both
 ```
 
-El SVG es canónico y vectorial. PNG es complementario y requiere Chrome,
-Chromium o Chrome Headless Shell.
-Si no se necesita compatibilidad adicional, `--format svg` evita esa dependencia.
+El SVG es el asset generado canónico y vectorial. PNG es complementario y
+requiere Chrome, Chromium o Chrome Headless Shell. Para un documento solo PDF,
+insertar SVG. Si se entrega DOCX u ODT, generar `--format both` e insertar el
+PNG: LibreOffice puede interpretar de forma incompleta algunos estilos CSS de
+los SVG producidos por D2, especialmente fondos de formas y temas.
 
 ## Inserción en QMD
 
 ```markdown
-![Flujo de validación de solicitudes.](assets/generated/proceso.svg){#fig-proceso fig-alt="El proceso valida los datos y solicita una corrección cuando están incompletos." width=95%}
+![Flujo de validación de solicitudes.](assets/generated/proceso.png){#fig-proceso fig-alt="El proceso valida los datos y solicita una corrección cuando están incompletos." width=95%}
 ```
 
 Mantener título, texto alternativo y referencia cruzada. No repetir en el texto
@@ -87,3 +89,6 @@ cada etiqueta del dibujo: explicar su propósito, decisiones y excepciones.
 3. Publicar el documento completo.
 4. Revisar el diagrama en todas las páginas de QA del PDF y del editable.
 5. Corregir `diagram.d2`, regenerar y volver a publicar.
+
+Si un SVG se ve correcto en Typst pero cambia colores o rellenos en LibreOffice,
+no retocar el ODT: reemplazar la referencia del QMD por el PNG generado.

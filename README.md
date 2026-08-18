@@ -26,6 +26,8 @@ segunda fuente maestra: se regeneran desde el mismo QMD que produce el PDF.
 Los diagramas siguen el mismo principio: el archivo `.d2` es la fuente y el
 SVG/PNG es un asset generado. El addon incluye perfiles claros para documentos
 y oscuros para láminas técnicas, además de plantillas de flujo y arquitectura.
+Para PDF se prefiere SVG; cuando también se entrega ODT/DOCX se recomienda PNG
+de alta resolución para evitar diferencias de interpretación SVG en LibreOffice.
 
 ## Instalación
 

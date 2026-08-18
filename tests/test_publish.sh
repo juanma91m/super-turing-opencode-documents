@@ -20,21 +20,32 @@ cp "$REPO_DIR/documents/templates/trabajo-practico/template.qmd" "$WORK_DIR/docu
 cp "$REPO_DIR/documents/templates/trabajo-practico/style.typ" "$WORK_DIR/style.typ"
 cp "$REPO_DIR/documents/diagrams/templates/flujo-proceso/diagram.d2" "$WORK_DIR/assets/flujo.d2"
 
+DIAGRAM_FORMAT="svg"
+DIAGRAM_EXTENSION="svg"
+for browser in google-chrome google-chrome-stable chromium chromium-browser chrome-headless-shell; do
+  if command -v "$browser" >/dev/null 2>&1; then
+    DIAGRAM_FORMAT="both"
+    DIAGRAM_EXTENSION="png"
+    break
+  fi
+done
+
 python3 "$REPO_DIR/scripts/render_diagram.py" \
   --d2 "$RUNTIME_DIR/d2-current/bin/d2" \
   --source "$WORK_DIR/assets/flujo.d2" \
   --output-dir "$WORK_DIR/assets/generated" \
   --name flujo \
   --profile document-light \
-  --format svg
+  --format "$DIAGRAM_FORMAT"
 
-python3 - "$WORK_DIR/documento.qmd" <<'PY'
+python3 - "$WORK_DIR/documento.qmd" "$DIAGRAM_EXTENSION" <<'PY'
 import pathlib
 import sys
 
 path = pathlib.Path(sys.argv[1])
+extension = sys.argv[2]
 with path.open("a") as stream:
-    stream.write("\n```{=tex}\n\\newpage\n```\n\n# Apéndice de QA\n\nPágina posterior al salto portable.\n\n![Flujo de prueba.](assets/generated/flujo.svg){#fig-flujo fig-alt=\"Flujo con validación y corrección.\" width=85%}\n")
+    stream.write(f"\n```{{=tex}}\n\\newpage\n```\n\n# Apéndice de QA\n\nPágina posterior al salto portable.\n\n![Flujo de prueba.](assets/generated/flujo.{extension}){{#fig-flujo fig-alt=\"Flujo con validación y corrección.\" width=85%}}\n")
 PY
 
 python3 "$REPO_DIR/scripts/publish_document.py" \
@@ -51,7 +62,7 @@ python3 "$REPO_DIR/scripts/publish_document.py" \
 [[ -s "$WORK_DIR/assets/generated/flujo.diagram-report.json" ]]
 compgen -G "$OUTPUT_DIR/qa/page-*.png" >/dev/null
 
-python3 - "$OUTPUT_DIR/publication-report.json" "$OUTPUT_DIR/documento.odt" <<'PY'
+python3 - "$OUTPUT_DIR/publication-report.json" "$OUTPUT_DIR/documento.odt" "$DIAGRAM_EXTENSION" <<'PY'
 import json
 import pathlib
 import shutil
@@ -59,6 +70,7 @@ import sys
 import zipfile
 
 report = json.loads(pathlib.Path(sys.argv[1]).read_text())
+extension = sys.argv[3]
 assert report["qa"]["pageCount"] >= 2
 assert len(report["editableQa"]) == 2
 if shutil.which("libreoffice") or shutil.which("soffice"):
@@ -72,7 +84,7 @@ with zipfile.ZipFile(sys.argv[2]) as odt:
 assert "Pagebreak" in styles
 assert "Pagebreak" in content
 assert "Liberation Serif" in styles
-assert any(name.startswith("Pictures/") and name.endswith(".svg") for name in embedded)
+assert any(name.startswith("Pictures/") and name.endswith(f".{extension}") for name in embedded)
 PY
 
 bash "$REPO_DIR/scripts/status.sh" \
