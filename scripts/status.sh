@@ -45,6 +45,14 @@ if runtime_present:
         [str(quarto), "--version"], check=False, text=True, capture_output=True
     ).stdout.strip()
 expected_version = data["runtime"]["version"]
+d2 = runtime_dir / "d2-current/bin/d2"
+d2_present = d2.is_file() and d2.stat().st_mode & 0o111
+d2_actual_version = ""
+if d2_present:
+    d2_actual_version = subprocess.run(
+        [str(d2), "--version"], check=False, text=True, capture_output=True
+    ).stdout.strip().removeprefix("v")
+d2_expected_version = data["diagramRuntime"]["version"]
 marker = target_dir / ".opencode-documents-addon.json"
 
 print(f"addon_id={data['id']}")
@@ -53,6 +61,9 @@ print(f"install_marker_present={'yes' if marker.is_file() else 'no'}")
 print(f"runtime_present={'yes' if runtime_present else 'no'}")
 print(f"runtime_expected_version={expected_version}")
 print(f"runtime_actual_version={actual_version or 'missing'}")
+print(f"diagram_runtime_present={'yes' if d2_present else 'no'}")
+print(f"diagram_runtime_expected_version={d2_expected_version}")
+print(f"diagram_runtime_actual_version={d2_actual_version or 'missing'}")
 print(f"managed_files_missing={len(missing)}")
 print(f"managed_files_mismatched={len(mismatched)}")
 for rel in missing:
@@ -62,5 +73,6 @@ for rel in mismatched:
 
 healthy_assets = not missing and not mismatched and marker.is_file()
 healthy_runtime = runtime_present and actual_version == expected_version
-raise SystemExit(0 if healthy_assets and healthy_runtime else 1)
+healthy_diagram_runtime = d2_present and d2_actual_version == d2_expected_version
+raise SystemExit(0 if healthy_assets and healthy_runtime and healthy_diagram_runtime else 1)
 PY

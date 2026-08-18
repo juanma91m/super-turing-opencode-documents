@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "documents",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "runtime": {
     "name": "quarto",
     "version": "1.10.18",
@@ -10,12 +10,26 @@
     "url": "https://github.com/quarto-dev/quarto-cli/releases/download/v1.10.18/quarto-1.10.18-linux-amd64.tar.gz",
     "sha256": "afad071b5bd22c02f2d300695743189d3650e0537a53073e654b630cff2b0c73"
   },
+  "diagramRuntime": {
+    "name": "d2",
+    "version": "0.7.1",
+    "platform": "linux-amd64",
+    "asset": "d2-v0.7.1-linux-amd64.tar.gz",
+    "url": "https://github.com/d2lang/d2/releases/download/v0.7.1/d2-v0.7.1-linux-amd64.tar.gz",
+    "sha256": "eb172adf59f38d1e5a70ab177591356754ffaf9bebb84e0ca8b767dfb421dad7"
+  },
   "managedFiles": [
     "commands/publicar-documento.md",
+    "commands/crear-diagrama.md",
     "skills/publicacion-documental/SKILL.md",
+    "skills/diagramacion-tecnica/SKILL.md",
     "scripts/publish_document.py",
+    "scripts/render_diagram.py",
     "documents/filters/pagebreak.lua",
     "documents/reference/reference.odt",
+    "documents/diagrams/templates/flujo-proceso/diagram.d2",
+    "documents/diagrams/templates/secuencia/diagram.d2",
+    "documents/diagrams/templates/arquitectura-poster/diagram.d2",
     "documents/templates/trabajo-practico/template.qmd",
     "documents/templates/trabajo-practico/style.typ",
     "documents/templates/informe-profesional/template.qmd",

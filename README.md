@@ -8,7 +8,9 @@ documentos presentables y listos para entregar.
 - skill global `publicacion-documental`;
 - comando `/publicar-documento`;
 - plantillas `trabajo-practico` e `informe-profesional`;
+- skill `diagramacion-tecnica` y comando `/crear-diagrama`;
 - runtime Quarto fijado e instalado en user-space;
+- runtime D2 fijado para flujos, procesos y arquitecturas reproducibles;
 - publicación PDF mediante Typst;
 - salida editable DOCX u ODT mediante Quarto/Pandoc;
 - `reference.odt` propio con A4, tipografías y jerarquía visual coherentes;
@@ -20,6 +22,10 @@ promete paridad visual exacta entre motores.
 
 El contenido y las correcciones se mantienen en QMD. Los editables no son una
 segunda fuente maestra: se regeneran desde el mismo QMD que produce el PDF.
+
+Los diagramas siguen el mismo principio: el archivo `.d2` es la fuente y el
+SVG/PNG es un asset generado. El addon incluye perfiles claros para documentos
+y oscuros para láminas técnicas, además de plantillas de flujo y arquitectura.
 
 ## Instalación
 
@@ -33,7 +39,7 @@ El runtime se instala, por defecto, bajo:
 ~/.local/share/super-turing-opencode-documents/runtime/
 ```
 
-No requiere `sudo` y no reemplaza una instalación global de Quarto.
+No requiere `sudo` y no reemplaza instalaciones globales de Quarto o D2.
 
 ## Uso
 
@@ -51,6 +57,19 @@ python3 ~/.config/opencode/scripts/publish_document.py \
   --output-dir ./entrega/final \
   --editable odt
 ```
+
+Para generar un diagrama:
+
+```bash
+python3 ~/.config/opencode/scripts/render_diagram.py \
+  --source ./entrega/assets/diagrams/proceso.d2 \
+  --output-dir ./entrega/assets/generated \
+  --profile document-light \
+  --format svg
+```
+
+Usar `--profile poster-dark` para una lámina técnica oscura y `--format both`
+cuando también se requiera PNG de alta resolución.
 
 Para un salto explícito compatible con los tres formatos, usar un bloque raw
 TeX en el QMD:
@@ -86,4 +105,4 @@ Ver [INSTALLATION.md](./INSTALLATION.md) para opciones y dependencias.
 
 ## Licencia
 
-MIT. Quarto, Pandoc y Typst conservan sus respectivas licencias upstream.
+MIT. Quarto, Pandoc, Typst y D2 conservan sus respectivas licencias upstream.

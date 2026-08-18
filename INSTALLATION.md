@@ -9,8 +9,9 @@
 - `tar`;
 - `sha256sum`.
 
-El installer descarga y verifica una versión fijada de Quarto. Quarto incluye
-los ejecutables de Pandoc y Typst utilizados por el pipeline.
+El installer descarga y verifica versiones fijadas de Quarto y D2. Quarto
+incluye los ejecutables de Pandoc y Typst utilizados por el pipeline; D2 genera
+los diagramas vectoriales.
 
 ## Instalación normal
 
@@ -32,7 +33,9 @@ Opciones:
 
 - `libreoffice`: renderizado de DOCX/ODT a PDF para su QA visual;
 - `pdfinfo`: inspección adicional del PDF;
-- `pdftoppm`: rasterización rápida para QA visual.
+- `pdftoppm`: rasterización rápida para QA visual;
+- `google-chrome`, `chromium` o `chrome-headless-shell`: salida PNG de alta
+  resolución para diagramas; SVG no requiere esta dependencia.
 
 Ninguna dependencia de sistema se instala silenciosamente. Si `pdftoppm` no
 está disponible, el publisher intenta generar las páginas de QA con el Typst

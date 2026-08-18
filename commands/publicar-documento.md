@@ -14,5 +14,8 @@ preservá su `style.typ`. Generá el PDF mediante
 las páginas de QA del PDF y de cada editable solicitado. Corregí siempre el QMD
 y regenerá; no conviertas el ODT o DOCX en una fuente maestra paralela.
 
+Si el contenido pide un flujo, proceso, secuencia o arquitectura, aplicá además
+`diagramacion-tecnica`, conservá el `.d2` y renderizá el asset antes de publicar.
+
 No cierres con un borrador Markdown si el usuario pidió un artefacto final. No
 inventes citas, bibliografía, resultados ni datos de portada.

@@ -1,0 +1,21 @@
+direction: right
+
+inicio: Solicitud recibida {
+  shape: oval
+}
+validar: Validar datos
+decision: ¿Información completa? {
+  shape: diamond
+}
+corregir: Solicitar corrección
+procesar: Procesar solicitud
+fin: Resultado comunicado {
+  shape: oval
+}
+
+inicio -> validar
+validar -> decision
+decision -> corregir: No
+corregir -> validar: Nueva versión
+decision -> procesar: Sí
+procesar -> fin

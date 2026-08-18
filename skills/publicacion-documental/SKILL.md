@@ -16,6 +16,8 @@ a devolver Markdown o recomendaciones de formato.
 2. Elegir la plantilla más cercana sin inventar una identidad visual nueva.
 3. Crear una carpeta de trabajo explícita y copiar allí la plantilla completa.
 4. Redactar el contenido en el `template.qmd` copiado, conservando su metadata.
+   Si necesita flujos, procesos o arquitecturas, aplicar también la skill
+   `diagramacion-tecnica` y generar assets reproducibles antes de publicar.
 5. Tratar el PDF como artefacto canónico salvo requisito explícito distinto.
 6. Publicar mediante el wrapper aprobado.
 7. Leer las imágenes de QA de todas las páginas del PDF y de los editables
@@ -62,6 +64,8 @@ corregir la fuente y regenerar todos los artefactos.
 - párrafos legibles, sin bloques artificialmente largos;
 - tablas con encabezados claros y ancho razonable;
 - figuras con título, fuente y texto alternativo;
+- diagramas con fuente `.d2` conservada y asset generado, nunca como captura
+  manual sin procedencia;
 - numeración y referencias cruzadas consistentes;
 - evitar emojis, adornos arbitrarios y colores sin función;
 - usar español correcto y mantener el registro pedido por el usuario;

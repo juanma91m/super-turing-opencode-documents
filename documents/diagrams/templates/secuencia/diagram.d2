@@ -1,0 +1,15 @@
+interaccion: Alta de una solicitud {
+  shape: sequence_diagram
+
+  usuario: Usuario
+  api: API
+  servicio: Servicio
+  base: Base de datos
+
+  usuario -> api: Envía solicitud
+  api -> servicio: Valida y procesa
+  servicio -> base: Persiste cambios
+  base -> servicio: Confirmación
+  servicio -> api: Resultado
+  api -> usuario: Respuesta
+}

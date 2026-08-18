@@ -1,0 +1,54 @@
+direction: down
+
+gateway: API Gateway :8080 {
+  style.fill: "#3B301B"
+  style.stroke: "#D6A33B"
+  style.font-color: "#F3C969"
+}
+
+services: Servicios de negocio {
+  direction: right
+
+  payment: Payment :8081 {
+    style.fill: "#12302D"
+    style.stroke: "#1B7F79"
+    style.font-color: "#5CD6C9"
+  }
+  account: Account :8082 {
+    style.fill: "#23233D"
+    style.stroke: "#6B63D9"
+    style.font-color: "#A7A1FF"
+  }
+  notification: Notification :8083 {
+    style.fill: "#351F2B"
+    style.stroke: "#C04D87"
+    style.font-color: "#FF82BD"
+  }
+}
+
+platform: Plataforma {
+  direction: right
+  postgres: PostgreSQL { shape: cylinder }
+  redis: Redis { shape: cylinder }
+  kafka: Kafka { shape: queue }
+  observability: Métricas y trazas
+}
+
+gateway -> services.payment: REST
+gateway -> services.account: REST
+gateway -> services.notification: REST
+services.payment -> platform.postgres
+services.account -> platform.redis
+services.payment -> platform.kafka: eventos
+services.notification -> platform.kafka: consume
+services.notification -> platform.observability
+
+metrics: Indicadores {
+  direction: right
+  throughput: "361 req/min"
+  latency: "11 ms p95"
+  events: "8 pendientes"
+  services: "3 servicios"
+}
+
+platform -> metrics: operación
