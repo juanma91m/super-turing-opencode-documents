@@ -1,0 +1,47 @@
+---
+title: "Título del trabajo práctico"
+subtitle: "Materia o consigna"
+author: "Nombre y apellido"
+date: today
+lang: es
+format:
+  typst:
+    papersize: a4
+    margin:
+      top: 24mm
+      bottom: 24mm
+      left: 27mm
+      right: 24mm
+    fontsize: 11pt
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    section-numbering: "1.1"
+    keep-typ: true
+    include-in-header: style.typ
+  docx:
+    toc: true
+    number-sections: true
+---
+
+# Introducción
+
+Presentá el problema, el objetivo del trabajo y el alcance adoptado.
+
+# Desarrollo
+
+Organizá el argumento en secciones con una progresión clara. Sustituí este
+texto por contenido final y respaldá las afirmaciones que requieran fuentes.
+
+## Análisis
+
+Explicá criterios, evidencia y relaciones relevantes sin confundir hechos con
+interpretaciones.
+
+# Conclusiones
+
+Sintetizá los hallazgos y respondé de forma directa al objetivo planteado.
+
+# Referencias {.unnumbered}
+
+Incluí únicamente fuentes reales y verificadas en el estilo solicitado.

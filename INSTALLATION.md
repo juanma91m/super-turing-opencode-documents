@@ -1,0 +1,51 @@
+# Instalación del addon Documents
+
+## Requisitos de bootstrap
+
+- Linux x86_64;
+- `bash`;
+- `python3`;
+- `curl`;
+- `tar`;
+- `sha256sum`.
+
+El installer descarga y verifica una versión fijada de Quarto. Quarto incluye
+los ejecutables de Pandoc y Typst utilizados por el pipeline.
+
+## Instalación normal
+
+```bash
+bash scripts/install.sh
+```
+
+Opciones:
+
+```text
+--target-dir <path>    Config global destino
+--runtime-dir <path>   Runtime user-space administrado
+--assets-only          Instalar assets sin descargar runtime
+--dry-run              Mostrar acciones sin escribir
+--no-validate          Omitir opencode debug config
+```
+
+## Dependencias opcionales
+
+- `libreoffice`: validación adicional y conversión de documentos editables;
+- `pdfinfo`: inspección adicional del PDF;
+- `pdftoppm`: rasterización rápida para QA visual.
+
+Ninguna dependencia de sistema se instala silenciosamente. Si `pdftoppm` no
+está disponible, el publisher intenta generar las páginas de QA con el Typst
+incluido en Quarto.
+
+## Validación
+
+```bash
+bash scripts/status.sh
+```
+
+Para una prueba real de publicación:
+
+```bash
+bash tests/test_publish.sh
+```

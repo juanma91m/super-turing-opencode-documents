@@ -1,0 +1,46 @@
+---
+title: "Título del informe"
+subtitle: "Síntesis ejecutiva o área"
+author: "Autor o equipo"
+date: today
+lang: es
+format:
+  typst:
+    papersize: a4
+    margin:
+      top: 21mm
+      bottom: 22mm
+      left: 23mm
+      right: 23mm
+    fontsize: 10.5pt
+    toc: true
+    toc-depth: 2
+    number-sections: true
+    section-numbering: "1.1"
+    keep-typ: true
+    include-in-header: style.typ
+  docx:
+    toc: true
+    number-sections: true
+---
+
+# Resumen ejecutivo
+
+Exponé en pocas líneas el contexto, los principales hallazgos y la recomendación.
+
+# Contexto y objetivo
+
+Definí qué motivó el informe, para quién se prepara y qué decisión debe ayudar
+a tomar.
+
+# Hallazgos
+
+Separá evidencia, interpretación y riesgos. Priorizá información accionable.
+
+# Recomendaciones
+
+Presentá acciones concretas, responsables o secuencia cuando corresponda.
+
+# Próximos pasos
+
+Indicá decisiones pendientes, dependencias y validaciones necesarias.

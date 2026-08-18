@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "documents",
+  "version": "0.1.0",
+  "runtime": {
+    "name": "quarto",
+    "version": "1.10.18",
+    "platform": "linux-amd64",
+    "asset": "quarto-1.10.18-linux-amd64.tar.gz",
+    "url": "https://github.com/quarto-dev/quarto-cli/releases/download/v1.10.18/quarto-1.10.18-linux-amd64.tar.gz",
+    "sha256": "afad071b5bd22c02f2d300695743189d3650e0537a53073e654b630cff2b0c73"
+  },
+  "managedFiles": [
+    "commands/publicar-documento.md",
+    "skills/publicacion-documental/SKILL.md",
+    "scripts/publish_document.py",
+    "documents/templates/trabajo-practico/template.qmd",
+    "documents/templates/trabajo-practico/style.typ",
+    "documents/templates/informe-profesional/template.qmd",
+    "documents/templates/informe-profesional/style.typ"
+  ]
+}

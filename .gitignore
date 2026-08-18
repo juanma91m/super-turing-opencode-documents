@@ -1,0 +1,6 @@
+.artifacts/
+.tmp/
+*.pdf
+*.docx
+*.odt
+qa/
