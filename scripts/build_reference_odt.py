@@ -134,7 +134,7 @@ def customize(styles_xml: bytes) -> bytes:
     set_text_style(root, "Heading_20_1", font="Liberation Sans", size="17pt", color="#17324D", weight="bold", italic=False)
     set_paragraph_style(root, "Heading_20_1", fo__margin_top="0.24in", fo__margin_bottom="0.1in", fo__border_bottom="0.04in solid #1B7F79", fo__padding_bottom="0.05in")
     set_text_style(root, "Heading_20_2", font="Liberation Sans", size="12.5pt", color="#1B7F79", weight="bold", italic=False)
-    set_paragraph_style(root, "Heading_20_2", fo__margin_top="0.18in", fo__margin_bottom="0.06in")
+    set_paragraph_style(root, "Heading_20_2", fo__margin_top="0.22in", fo__margin_bottom="0.09in")
     set_text_style(root, "Heading_20_3", font="Liberation Sans", size="10.5pt", color="#17324D", weight="bold", italic=False)
     set_paragraph_style(root, "Heading_20_3", fo__margin_top="0.12in", fo__margin_bottom="0.04in")
 

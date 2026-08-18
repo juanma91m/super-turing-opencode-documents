@@ -18,8 +18,8 @@
 ]
 
 #show heading.where(level: 2): it => block(
-  above: 0.95em,
-  below: 0.4em,
+  above: 1.15em,
+  below: 0.5em,
   breakable: false,
 )[
   #set text(size: 12.5pt, weight: "semibold", fill: accent)
