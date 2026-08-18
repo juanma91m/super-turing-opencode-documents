@@ -1,6 +1,9 @@
 .artifacts/
 .tmp/
+__pycache__/
 *.pdf
 *.docx
 *.odt
+!documents/reference/
+!documents/reference/reference.odt
 qa/

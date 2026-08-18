@@ -11,7 +11,8 @@ extensión aproximada y si se requiere PDF, DOCX u ODT.
 Usá una carpeta de trabajo explícita, copiá la plantilla adecuada completa y
 preservá su `style.typ`. Generá el PDF mediante
 `~/.config/opencode/scripts/publish_document.py`, inspeccioná visualmente todas
-las páginas de QA y corregí defectos antes de entregar.
+las páginas de QA del PDF y de cada editable solicitado. Corregí siempre el QMD
+y regenerá; no conviertas el ODT o DOCX en una fuente maestra paralela.
 
 No cierres con un borrador Markdown si el usuario pidió un artefacto final. No
 inventes citas, bibliografía, resultados ni datos de portada.

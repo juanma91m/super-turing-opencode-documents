@@ -30,13 +30,16 @@ Opciones:
 
 ## Dependencias opcionales
 
-- `libreoffice`: validación adicional y conversión de documentos editables;
+- `libreoffice`: renderizado de DOCX/ODT a PDF para su QA visual;
 - `pdfinfo`: inspección adicional del PDF;
 - `pdftoppm`: rasterización rápida para QA visual.
 
 Ninguna dependencia de sistema se instala silenciosamente. Si `pdftoppm` no
 está disponible, el publisher intenta generar las páginas de QA con el Typst
 incluido en Quarto.
+
+Sin LibreOffice, los editables se generan pero su QA queda registrado como
+`skipped` en `publication-report.json`; el publisher no simula esa validación.
 
 ## Validación
 

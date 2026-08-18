@@ -18,7 +18,8 @@ a devolver Markdown o recomendaciones de formato.
 4. Redactar el contenido en el `template.qmd` copiado, conservando su metadata.
 5. Tratar el PDF como artefacto canónico salvo requisito explícito distinto.
 6. Publicar mediante el wrapper aprobado.
-7. Leer las imágenes de QA de todas las páginas.
+7. Leer las imágenes de QA de todas las páginas del PDF y de los editables
+   solicitados cuando estén disponibles.
 8. Corregir y volver a publicar si hay defectos.
 9. Entregar artefacto final, fuente y formatos editables solicitados.
 
@@ -40,6 +41,19 @@ python3 ~/.config/opencode/scripts/publish_document.py \
 
 Valores de `--editable`: `none`, `docx`, `odt`, `both`.
 
+El wrapper aplica automáticamente el `reference.odt` institucional y el filtro
+de saltos portables. Para forzar un salto de página desde el QMD, usar:
+
+````markdown
+```{=tex}
+\newpage
+```
+````
+
+No usar bloques raw Typst para este fin: funcionarían en el PDF pero se
+perderían en ODT/DOCX. No corregir el ODT manualmente como sustituto del QMD;
+corregir la fuente y regenerar todos los artefactos.
+
 ## Criterios editoriales
 
 - usar jerarquía semántica de títulos, no tamaño manual como sustituto;
@@ -59,6 +73,7 @@ La compilación exitosa no alcanza. Antes de cerrar:
 
 - verificar que el PDF exista y no esté vacío;
 - inspeccionar todas las imágenes bajo `qa/`;
+- si se solicitó DOCX u ODT, inspeccionar también `qa-editable/<formato>/pages/`;
 - buscar texto cortado, tablas desbordadas, imágenes borrosas, páginas vacías,
   encabezados huérfanos, saltos incómodos y densidad visual irregular;
 - confirmar que portada, índice, numeración y bibliografía sean coherentes;
@@ -66,6 +81,10 @@ La compilación exitosa no alcanza. Antes de cerrar:
 
 Si no se pudo hacer QA visual, declararlo explícitamente; no afirmar que el
 documento está listo para entregar.
+
+La revisión del editable busca legibilidad, saltos, tablas, figuras y jerarquía
+correctas. No exige paridad píxel a píxel con Typst: el PDF sigue siendo el
+artefacto canónico.
 
 ## Entrega esperada
 

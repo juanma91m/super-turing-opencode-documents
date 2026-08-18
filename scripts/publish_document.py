@@ -11,6 +11,7 @@ import pathlib
 import shutil
 import subprocess
 import sys
+import tempfile
 from datetime import datetime, timezone
 
 
@@ -28,7 +29,14 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--name", help="Output basename; defaults to the source stem")
     parser.add_argument("--quarto", help="Explicit managed Quarto executable")
+    parser.add_argument("--reference-odt", help="Explicit Pandoc reference ODT")
+    parser.add_argument("--pagebreak-filter", help="Explicit portable page-break Lua filter")
     parser.add_argument("--no-qa", action="store_true", help="Skip page rasterization")
+    parser.add_argument(
+        "--no-editable-qa",
+        action="store_true",
+        help="Skip LibreOffice QA for requested editable artifacts",
+    )
     return parser.parse_args()
 
 
@@ -55,6 +63,23 @@ def discover_quarto(explicit: str | None) -> pathlib.Path:
         if candidate.is_file() and os.access(candidate, os.X_OK):
             return candidate.resolve()
     fail("Quarto is not available; reinstall the Documents addon runtime")
+
+
+def discover_resource(relative: str, explicit: str | None = None) -> pathlib.Path:
+    candidates: list[pathlib.Path] = []
+    if explicit:
+        candidates.append(pathlib.Path(explicit).expanduser())
+    addon_root = pathlib.Path(__file__).resolve().parent.parent
+    candidates.extend(
+        (
+            addon_root / relative,
+            pathlib.Path.home() / ".config/opencode" / relative,
+        )
+    )
+    for candidate in candidates:
+        if candidate.is_file():
+            return candidate.resolve()
+    fail(f"required addon resource is not available: {relative}")
 
 
 def run(command: list[str], cwd: pathlib.Path) -> subprocess.CompletedProcess[str]:
@@ -84,6 +109,7 @@ def render_quarto(
     source: pathlib.Path,
     output_name: str,
     output_format: str,
+    pagebreak_filter: pathlib.Path,
 ) -> pathlib.Path:
     run(
         [
@@ -94,6 +120,8 @@ def render_quarto(
             output_format,
             "--output",
             output_name,
+            "--lua-filter",
+            str(pagebreak_filter),
         ],
         source.parent,
     )
@@ -101,7 +129,11 @@ def render_quarto(
 
 
 def render_odt(
-    quarto: pathlib.Path, source: pathlib.Path, generated: pathlib.Path
+    quarto: pathlib.Path,
+    source: pathlib.Path,
+    generated: pathlib.Path,
+    reference_odt: pathlib.Path,
+    pagebreak_filter: pathlib.Path,
 ) -> pathlib.Path:
     run(
         [
@@ -113,8 +145,10 @@ def render_odt(
             "--to",
             "odt",
             "--standalone",
-            "--toc",
-            "--number-sections",
+            "--reference-doc",
+            str(reference_odt),
+            "--lua-filter",
+            str(pagebreak_filter),
             "--resource-path",
             str(source.parent),
             "--output",
@@ -196,6 +230,61 @@ def inspect_pdf(pdf: pathlib.Path) -> dict[str, object]:
     return result
 
 
+def render_editable_qa(
+    quarto: pathlib.Path,
+    artifact: pathlib.Path,
+    qa_root: pathlib.Path,
+) -> dict[str, object]:
+    office = shutil.which("libreoffice") or shutil.which("soffice")
+    if not office:
+        return {
+            "artifact": str(artifact),
+            "status": "skipped",
+            "reason": "LibreOffice/soffice is not available",
+            "visualInspectionRequired": True,
+        }
+
+    if qa_root.exists():
+        shutil.rmtree(qa_root)
+    qa_root.mkdir(parents=True)
+    with tempfile.TemporaryDirectory(prefix="opencode-documents-office-") as temp:
+        temp_dir = pathlib.Path(temp)
+        profile = temp_dir / "profile"
+        run(
+            [
+                office,
+                "--headless",
+                f"-env:UserInstallation={profile.as_uri()}",
+                "--convert-to",
+                "pdf",
+                "--outdir",
+                str(temp_dir),
+                str(artifact),
+            ],
+            artifact.parent,
+        )
+        converted = temp_dir / f"{artifact.stem}.pdf"
+        rendered_pdf = copy_artifact(converted, qa_root / "rendered.pdf")
+
+    pages, rasterizer = rasterize_pdf(
+        quarto,
+        rendered_pdf,
+        None,
+        qa_root / "pages",
+    )
+    return {
+        "artifact": str(artifact),
+        "status": "generated",
+        "engine": pathlib.Path(office).name,
+        "renderedPdf": str(rendered_pdf),
+        "pdf": inspect_pdf(rendered_pdf),
+        "rasterizer": rasterizer,
+        "pageCount": len(pages),
+        "pages": [str(path) for path in pages],
+        "visualInspectionRequired": True,
+    }
+
+
 def main() -> int:
     args = parse_args()
     source = pathlib.Path(args.source).expanduser().resolve()
@@ -210,9 +299,14 @@ def main() -> int:
         fail("output name must be a simple filename")
 
     quarto = discover_quarto(args.quarto)
+    pagebreak_filter = discover_resource(
+        "documents/filters/pagebreak.lua", args.pagebreak_filter
+    )
     version = run([str(quarto), "--version"], source.parent).stdout.strip()
     pdf_name = f"{basename}.pdf"
-    generated_pdf = render_quarto(quarto, source, pdf_name, "typst")
+    generated_pdf = render_quarto(
+        quarto, source, pdf_name, "typst", pagebreak_filter
+    )
     final_pdf = copy_artifact(generated_pdf, output_dir / pdf_name)
 
     typst_source = locate_typst_source(source, basename)
@@ -223,14 +317,23 @@ def main() -> int:
     editable_artifacts: list[pathlib.Path] = []
     if args.editable in ("docx", "both"):
         generated_docx = render_quarto(
-            quarto, source, f"{basename}.docx", "docx"
+            quarto, source, f"{basename}.docx", "docx", pagebreak_filter
         )
         editable_artifacts.append(
             copy_artifact(generated_docx, output_dir / f"{basename}.docx")
         )
     if args.editable in ("odt", "both"):
+        reference_odt = discover_resource(
+            "documents/reference/reference.odt", args.reference_odt
+        )
         generated_odt = source.parent / f"{basename}.odt"
-        render_odt(quarto, source, generated_odt)
+        render_odt(
+            quarto,
+            source,
+            generated_odt,
+            reference_odt,
+            pagebreak_filter,
+        )
         editable_artifacts.append(
             copy_artifact(generated_odt, output_dir / f"{basename}.odt")
         )
@@ -241,6 +344,17 @@ def main() -> int:
         qa_pages, qa_engine = rasterize_pdf(
             quarto, final_pdf, typst_source, output_dir / "qa"
         )
+
+    editable_qa: list[dict[str, object]] = []
+    if not args.no_qa and not args.no_editable_qa:
+        for artifact in editable_artifacts:
+            editable_qa.append(
+                render_editable_qa(
+                    quarto,
+                    artifact,
+                    output_dir / "qa-editable" / artifact.suffix.lstrip("."),
+                )
+            )
 
     source_copy = output_dir / source.name
     if source_copy.resolve() != source.resolve():
@@ -257,6 +371,7 @@ def main() -> int:
         "pdf": inspect_pdf(final_pdf),
         "typstSource": str(final_typst) if final_typst else None,
         "editableArtifacts": [str(path) for path in editable_artifacts],
+        "editableQa": editable_qa,
         "qa": {
             "engine": qa_engine,
             "pageCount": len(qa_pages),
@@ -268,6 +383,11 @@ def main() -> int:
     report_path.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n")
     print(f"[document-publisher] canonical PDF: {final_pdf}")
     print(f"[document-publisher] QA pages: {len(qa_pages)} ({qa_engine})")
+    for item in editable_qa:
+        print(
+            "[document-publisher] editable QA: "
+            f"{item['artifact']} ({item['status']})"
+        )
     print(f"[document-publisher] report: {report_path}")
     return 0
 
