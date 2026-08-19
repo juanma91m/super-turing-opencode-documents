@@ -1,0 +1,33 @@
+direction: right
+
+entrada: Señal de entrada {
+  style.fill: "#0A2338"
+  style.stroke: "#55E7FF"
+  style.font-color: "#D9FAFF"
+}
+
+analisis: Análisis {
+  direction: down
+  contexto: Contexto
+  reglas: Reglas
+  riesgo: Riesgo
+}
+
+decision: Decisión técnica {
+  style.fill: "#112B40"
+  style.stroke: "#55E7FF"
+  style.font-color: "#D9FAFF"
+}
+
+salidas: Resultados {
+  direction: down
+  rapido: Camino rápido
+  seguro: Camino seguro
+}
+
+entrada -> analisis.contexto
+analisis.contexto -> analisis.reglas
+analisis.reglas -> analisis.riesgo
+analisis.riesgo -> decision
+decision -> salidas.rapido: bajo riesgo
+decision -> salidas.seguro: alto riesgo

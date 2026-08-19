@@ -28,6 +28,8 @@ SVG/PNG es un asset generado. El addon incluye perfiles claros para documentos
 y oscuros para láminas técnicas, además de plantillas de flujo y arquitectura.
 Para PDF se prefiere SVG; cuando también se entrega ODT/DOCX se recomienda PNG
 de alta resolución para evitar diferencias de interpretación SVG en LibreOffice.
+El perfil `neon-blueprint` agrega una plantilla 16:9 compuesta en Typst con
+título, diagrama, tarjetas e indicadores para publicaciones o presentaciones.
 
 ## Instalación
 
@@ -72,6 +74,10 @@ python3 ~/.config/opencode/scripts/render_diagram.py \
 
 Usar `--profile poster-dark` para una lámina técnica oscura y `--format both`
 cuando también se requiera PNG de alta resolución.
+
+La plantilla `infografia-neon` se genera en dos pasos: primero su `diagram.png`
+con `render_diagram.py --profile neon-blueprint` y luego la lámina completa con
+`render_infographic.py`.
 
 Para un salto explícito compatible con los tres formatos, usar un bloque raw
 TeX en el QMD:

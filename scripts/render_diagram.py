@@ -21,6 +21,7 @@ from datetime import datetime, timezone
 PROFILES = {
     "document-light": {"theme": "4", "pad": "28"},
     "poster-dark": {"theme": "200", "pad": "36"},
+    "neon-blueprint": {"theme": "200", "pad": "24"},
 }
 
 

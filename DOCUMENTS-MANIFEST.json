@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "documents",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "runtime": {
     "name": "quarto",
     "version": "1.10.18",
@@ -25,11 +25,14 @@
     "skills/diagramacion-tecnica/SKILL.md",
     "scripts/publish_document.py",
     "scripts/render_diagram.py",
+    "scripts/render_infographic.py",
     "documents/filters/pagebreak.lua",
     "documents/reference/reference.odt",
     "documents/diagrams/templates/flujo-proceso/diagram.d2",
     "documents/diagrams/templates/secuencia/diagram.d2",
     "documents/diagrams/templates/arquitectura-poster/diagram.d2",
+    "documents/diagrams/templates/infografia-neon/diagram.d2",
+    "documents/diagrams/templates/infografia-neon/infographic.typ",
     "documents/templates/trabajo-practico/template.qmd",
     "documents/templates/trabajo-practico/style.typ",
     "documents/templates/informe-profesional/template.qmd",

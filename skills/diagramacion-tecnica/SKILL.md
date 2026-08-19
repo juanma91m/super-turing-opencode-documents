@@ -27,6 +27,7 @@ No usar capturas manuales de editores como fuente canónica.
 - `~/.config/opencode/documents/diagrams/templates/flujo-proceso/`
 - `~/.config/opencode/documents/diagrams/templates/secuencia/`
 - `~/.config/opencode/documents/diagrams/templates/arquitectura-poster/`
+- `~/.config/opencode/documents/diagrams/templates/infografia-neon/`
 
 Copiar la plantilla elegida a `assets/diagrams/<nombre>/`, editar `diagram.d2`
 y conservar ese archivo junto a los resultados.
@@ -55,6 +56,27 @@ python3 ~/.config/opencode/scripts/render_diagram.py \
   --format both
 ```
 
+Infografía técnica `neon-blueprint`:
+
+```bash
+python3 ~/.config/opencode/scripts/render_diagram.py \
+  --source diagram.d2 \
+  --output-dir . \
+  --name diagram \
+  --profile neon-blueprint \
+  --format both
+
+python3 ~/.config/opencode/scripts/render_infographic.py \
+  --source infographic.typ \
+  --output-dir output \
+  --name infografia-neon \
+  --format both
+```
+
+La plantilla neon es 16:9 y combina un diagrama D2 con título, tarjetas,
+controles e indicadores compuestos en Typst. Editar los textos en
+`infographic.typ`; no rasterizar texto con un generador de imágenes.
+
 El SVG es el asset generado canónico y vectorial. PNG es complementario y
 requiere Chrome, Chromium o Chrome Headless Shell. Para un documento solo PDF,
 insertar SVG. Si se entrega DOCX u ODT, generar `--format both` e insertar el
@@ -81,6 +103,8 @@ cada etiqueta del dibujo: explicar su propósito, decisiones y excepciones.
 - separar una arquitectura compleja en vistas de contexto, contenedores o flujo;
 - usar `document-light` dentro de A4 y reservar `poster-dark` para láminas o
   figuras donde el fondo oscuro tenga una función editorial clara.
+- usar `neon-blueprint` para una infografía técnica completa, no como estilo
+  predeterminado de cada figura de un informe.
 
 ## Quality gate
 

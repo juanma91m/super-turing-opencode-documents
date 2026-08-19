@@ -62,6 +62,28 @@ python3 "$REPO_DIR/scripts/publish_document.py" \
 [[ -s "$WORK_DIR/assets/generated/flujo.diagram-report.json" ]]
 compgen -G "$OUTPUT_DIR/qa/page-*.png" >/dev/null
 
+if [[ "$DIAGRAM_EXTENSION" == "png" ]]; then
+  mkdir -p "$WORK_DIR/neon" "$WORK_DIR/neon-output"
+  cp "$REPO_DIR/documents/diagrams/templates/infografia-neon/diagram.d2" "$WORK_DIR/neon/diagram.d2"
+  cp "$REPO_DIR/documents/diagrams/templates/infografia-neon/infographic.typ" "$WORK_DIR/neon/infographic.typ"
+  python3 "$REPO_DIR/scripts/render_diagram.py" \
+    --d2 "$RUNTIME_DIR/d2-current/bin/d2" \
+    --source "$WORK_DIR/neon/diagram.d2" \
+    --output-dir "$WORK_DIR/neon" \
+    --name diagram \
+    --profile neon-blueprint \
+    --format both
+  python3 "$REPO_DIR/scripts/render_infographic.py" \
+    --quarto "$RUNTIME_DIR/current/bin/quarto" \
+    --source "$WORK_DIR/neon/infographic.typ" \
+    --output-dir "$WORK_DIR/neon-output" \
+    --name infografia-neon \
+    --format both
+  [[ -s "$WORK_DIR/neon-output/infografia-neon.png" ]]
+  [[ -s "$WORK_DIR/neon-output/infografia-neon.pdf" ]]
+  [[ -s "$WORK_DIR/neon-output/infografia-neon.infographic-report.json" ]]
+fi
+
 python3 - "$OUTPUT_DIR/publication-report.json" "$OUTPUT_DIR/documento.odt" "$DIAGRAM_EXTENSION" <<'PY'
 import json
 import pathlib
