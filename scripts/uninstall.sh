@@ -34,14 +34,22 @@ done
 mapfile -t managed_files < <(
   python3 - "$REPO_DIR/DOCUMENTS-MANIFEST.json" <<'PY'
 import json, pathlib, sys
-for item in json.loads(pathlib.Path(sys.argv[1]).read_text()).get("managedFiles", []):
-    print(item)
+manifest = pathlib.Path(sys.argv[1])
+repo = manifest.parent
+data = json.loads(manifest.read_text())
+for item in data.get("managedFiles", []):
+    print(f"{item}\t{item}")
+for tree in data.get("managedTrees", []):
+    source_root = repo / tree["source"]
+    for source in sorted(path for path in source_root.rglob("*") if path.is_file()):
+        print(f"{source.relative_to(repo)}\t{pathlib.Path(tree['target']) / source.relative_to(source_root)}")
 PY
 )
 
-for rel in "${managed_files[@]}"; do
-  source="$REPO_DIR/$rel"
-  target="$TARGET_DIR/$rel"
+for mapping in "${managed_files[@]}"; do
+  IFS=$'\t' read -r source_rel target_rel <<<"$mapping"
+  source="$REPO_DIR/$source_rel"
+  target="$TARGET_DIR/$target_rel"
   if [[ ! -e "$target" ]]; then
     continue
   fi

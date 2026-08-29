@@ -12,18 +12,24 @@ a devolver Markdown o recomendaciones de formato.
 
 ## Modelo de trabajo
 
-1. Confirmar audiencia, tipo de documento, formato exigido y datos de portada.
-2. Elegir la plantilla más cercana sin inventar una identidad visual nueva.
-3. Crear una carpeta de trabajo explícita y copiar allí la plantilla completa.
-4. Redactar el contenido en el `template.qmd` copiado, conservando su metadata.
+1. Confirmar audiencia, tipo de documento, contexto laboral/académico/personal,
+   formato exigido y datos de portada.
+2. Recuperar preferencias visuales durables cuando estén disponibles y aplicar
+   solo las que coincidan con el contexto actual. Una identidad laboral no debe
+   trasladarse automáticamente a una entrega académica ni a otra organización.
+3. Elegir la plantilla más cercana sin inventar una identidad visual nueva. Si
+   el contexto es ambiguo y cambia materialmente la estética, hacer una única
+   pregunta enfocada.
+4. Crear una carpeta de trabajo explícita y copiar allí la plantilla completa.
+5. Redactar el contenido en el `template.qmd` copiado, conservando su metadata.
    Si necesita flujos, procesos o arquitecturas, aplicar también la skill
    `diagramacion-tecnica` y generar assets reproducibles antes de publicar.
-5. Tratar el PDF como artefacto canónico salvo requisito explícito distinto.
-6. Publicar mediante el wrapper aprobado.
-7. Leer las imágenes de QA de todas las páginas del PDF y de los editables
+6. Tratar el PDF como artefacto canónico salvo requisito explícito distinto.
+7. Publicar mediante el wrapper aprobado.
+8. Leer las imágenes de QA de todas las páginas del PDF y de los editables
    solicitados cuando estén disponibles.
-8. Corregir y volver a publicar si hay defectos.
-9. Entregar artefacto final, fuente y formatos editables solicitados.
+9. Corregir y volver a publicar si hay defectos.
+10. Entregar artefacto final, fuente y formatos editables solicitados.
 
 ## Plantillas disponibles
 

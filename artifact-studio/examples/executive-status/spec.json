@@ -1,0 +1,96 @@
+{
+  "version": "1.0",
+  "meta": {
+    "title": "Estado ejecutivo del programa Atlas",
+    "subtitle": "Avance, calidad operativa y decisiones para el próximo trimestre",
+    "author": "Artifact Studio",
+    "organization": "Organización de ejemplo",
+    "date": "28 de agosto de 2026",
+    "audience": "Comité de dirección",
+    "purpose": "Demostración reproducible del pipeline multiformato",
+    "sampleData": true
+  },
+  "theme": "executive-light",
+  "sections": [
+    {
+      "title": "El programa avanza con estabilidad y una dependencia crítica",
+      "subtitle": "Resumen ejecutivo · SAMPLE DATA",
+      "blocks": [
+        { "type": "paragraph", "text": "El alcance prioritario mantiene una trayectoria favorable. La calidad operativa mejoró durante el trimestre, pero la integración de identidad concentra el principal riesgo del próximo hito.", "sourceIds": ["sample-pmo"] },
+        { "type": "kpiGrid", "items": [
+          { "label": "AVANCE DEL ALCANCE", "value": "72%", "context": "+9 pp desde mayo", "trend": "up" },
+          { "label": "HITOS EN FECHA", "value": "8/10", "context": "2 con plan de recuperación", "trend": "flat" },
+          { "label": "INCIDENTES P1", "value": "1", "context": "−67% trimestral", "trend": "down" },
+          { "label": "RIESGOS ALTOS", "value": "2", "context": "1 requiere decisión", "trend": "flat" }
+        ] },
+        { "type": "callout", "tone": "warning", "title": "Decisión requerida", "text": "Confirmar capacidad adicional para la integración de identidad antes del 12 de septiembre." }
+      ]
+    },
+    {
+      "title": "La ejecución acumulada alcanzó 72% y sostiene la tendencia",
+      "blocks": [
+        { "type": "chart", "chart": { "kind": "line", "title": "Avance acumulado", "subtitle": "Porcentaje de alcance prioritario completado", "insight": "La velocidad se estabilizó por encima de 8 puntos porcentuales mensuales.", "sourceId": "sample-pmo", "unit": "%", "editablePreferred": true, "series": [ { "name": "Avance", "values": [ { "category": "2026-03-01", "value": 24 }, { "category": "2026-04-01", "value": 33 }, { "category": "2026-05-01", "value": 45 }, { "category": "2026-06-01", "value": 54 }, { "category": "2026-07-01", "value": 63 }, { "category": "2026-08-01", "value": 72 } ] } ], "annotations": [ { "label": "Hito de integración", "category": "2026-08-01", "value": 72 } ] } }
+      ]
+    },
+    {
+      "title": "Core y observabilidad lideran; identidad necesita refuerzo",
+      "blocks": [
+        { "type": "chart", "chart": { "kind": "bar", "title": "Avance por frente", "insight": "Identidad está 19 puntos por debajo del promedio de los otros frentes.", "sourceId": "sample-pmo", "unit": "%", "editablePreferred": true, "series": [ { "name": "Avance", "values": [ { "category": "Core", "value": 86 }, { "category": "Observabilidad", "value": 81 }, { "category": "Datos", "value": 74 }, { "category": "Experiencia", "value": 69 }, { "category": "Identidad", "value": 58 } ] } ], "annotations": [] } }
+      ]
+    },
+    {
+      "title": "Los hitos críticos tienen responsables y fechas explícitas",
+      "blocks": [
+        { "type": "table", "table": { "columns": ["Hito", "Responsable", "Fecha", "Estado"], "rows": [ ["Contrato de identidad", "Arquitectura", "12 sep", "En riesgo"], ["Prueba de resiliencia", "Plataforma", "19 sep", "En fecha"], ["Piloto controlado", "Producto", "3 oct", "En fecha"], ["Go-live fase 1", "Programa", "21 oct", "Condicionado"] ], "caption": "Plan de hitos prioritarios — SAMPLE DATA", "sourceId": "sample-pmo" } },
+        { "type": "callout", "tone": "info", "title": "Criterio de salida", "text": "El piloto requiere cero incidentes P1 abiertos y cobertura de observabilidad en los flujos críticos." }
+      ]
+    },
+    {
+      "title": "La arquitectura desacopla canales, servicios y plataforma",
+      "blocks": [
+        { "type": "diagram", "diagram": { "title": "Arquitectura objetivo simplificada", "kind": "architecture", "direction": "right", "nodes": [ { "id": "channels", "label": "Canales" }, { "id": "gateway", "label": "API Gateway" }, { "id": "services", "label": "Servicios de dominio" }, { "id": "events", "label": "Bus de eventos" }, { "id": "data", "label": "Plataforma de datos" }, { "id": "observability", "label": "Observabilidad" } ], "edges": [ { "from": "channels", "to": "gateway", "label": "HTTPS" }, { "from": "gateway", "to": "services", "label": "API" }, { "from": "services", "to": "events", "label": "eventos" }, { "from": "events", "to": "data", "label": "stream" }, { "from": "services", "to": "observability", "label": "telemetría" }, { "from": "events", "to": "observability", "label": "métricas" } ], "caption": "Vista ejecutiva; no representa todos los componentes. SAMPLE DATA." } }
+      ]
+    },
+    {
+      "title": "Dos riesgos concentran la exposición del próximo hito",
+      "blocks": [
+        { "type": "riskMatrix", "items": [
+          { "risk": "Demora en contrato de identidad", "probability": "high", "impact": "high", "mitigation": "Asignar especialista y cerrar contrato técnico antes del 12 sep." },
+          { "risk": "Capacidad insuficiente en pruebas", "probability": "medium", "impact": "high", "mitigation": "Reservar entorno y automatizar los escenarios críticos." },
+          { "risk": "Calidad irregular de datos históricos", "probability": "medium", "impact": "medium", "mitigation": "Aplicar reglas de calidad y monitoreo de excepciones." },
+          { "risk": "Adopción menor a la prevista", "probability": "low", "impact": "medium", "mitigation": "Pilotear con usuarios referentes y medir tareas clave." }
+        ] },
+        { "type": "callout", "tone": "risk", "title": "Escalamiento", "text": "El riesgo de identidad pasa a crítico si el contrato no se aprueba en la fecha comprometida." }
+      ]
+    },
+    {
+      "title": "El camino al go-live prioriza validación antes que volumen",
+      "blocks": [
+        { "type": "timeline", "items": [
+          { "date": "Ago", "title": "Diseño cerrado", "detail": "Contratos principales", "status": "done" },
+          { "date": "Sep", "title": "Resiliencia", "detail": "Pruebas integrales", "status": "current" },
+          { "date": "Oct", "title": "Piloto", "detail": "Usuarios controlados", "status": "next" },
+          { "date": "Nov", "title": "Escala", "detail": "Expansión gradual", "status": "next" }
+        ] },
+        { "type": "paragraph", "text": "La expansión se habilita por evidencia de calidad y estabilidad; no por una fecha aislada.", "sourceIds": ["sample-plan"] }
+      ]
+    },
+    {
+      "title": "Tres acciones protegen el resultado del trimestre",
+      "blocks": [
+        { "type": "numberedList", "items": [
+          "Reforzar identidad durante cuatro semanas con capacidad especializada y seguimiento diario.",
+          "Mantener el piloto acotado hasta cumplir los criterios de resiliencia, observabilidad y soporte.",
+          "Publicar semanalmente avance, riesgos y decisiones pendientes con una única fuente de datos."
+        ] },
+        { "type": "comparison", "left": { "title": "Hacer ahora", "items": ["Cerrar decisiones irreversibles", "Automatizar pruebas críticas", "Medir experiencia del piloto"] }, "right": { "title": "Evitar", "items": ["Acelerar sin evidencia", "Agregar alcance secundario", "Ocultar incertidumbre con promedios"] } },
+        { "type": "callout", "tone": "success", "title": "Resultado esperado", "text": "Llegar al piloto con riesgo controlado, señales operativas completas y capacidad de reversión." }
+      ]
+    }
+  ],
+  "sources": [
+    { "id": "sample-pmo", "title": "Tablero PMO del programa Atlas", "publisher": "Organización de ejemplo", "date": "2026-08-28", "accessedAt": "2026-08-28", "note": "Fuente ficticia para demostración", "sample": true },
+    { "id": "sample-plan", "title": "Plan trimestral del programa Atlas", "publisher": "Organización de ejemplo", "date": "2026-08-25", "accessedAt": "2026-08-28", "note": "Fuente ficticia para demostración", "sample": true }
+  ],
+  "assets": []
+}

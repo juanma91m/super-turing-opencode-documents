@@ -9,7 +9,8 @@ RUNTIME_DIR="${HOME}/.local/share/super-turing-opencode-documents/runtime"
 DRY_RUN=0
 VALIDATE=1
 ASSETS_ONLY=0
-MANAGED_FILES=()
+MANAGED_MAPPINGS=()
+OBSOLETE_TARGETS=()
 
 usage() {
   cat <<'EOF'
@@ -50,17 +51,77 @@ PY
 }
 
 load_managed_files() {
-  mapfile -t MANAGED_FILES < <(
+  mapfile -t MANAGED_MAPPINGS < <(
+    python3 - "$REPO_DIR/DOCUMENTS-MANIFEST.json" <<'PY'
+import json
+import pathlib
+import sys
+
+manifest = pathlib.Path(sys.argv[1])
+repo = manifest.parent
+data = json.loads(manifest.read_text())
+for item in data.get("managedFiles", []):
+    print(f"{item}\t{item}")
+for tree in data.get("managedTrees", []):
+    source_root = repo / tree["source"]
+    for source in sorted(path for path in source_root.rglob("*") if path.is_file()):
+        relative = source.relative_to(source_root)
+        print(f"{source.relative_to(repo)}\t{pathlib.Path(tree['target']) / relative}")
+PY
+  )
+  mapfile -t OBSOLETE_TARGETS < <(
     python3 - "$REPO_DIR/DOCUMENTS-MANIFEST.json" <<'PY'
 import json
 import pathlib
 import sys
 
 data = json.loads(pathlib.Path(sys.argv[1]).read_text())
-for item in data.get("managedFiles", []):
+for item in data.get("obsoleteTargets", []):
     print(item)
 PY
   )
+}
+
+remove_obsolete_targets() {
+  local marker="$TARGET_DIR/.opencode-documents-addon.json"
+  local timestamp backup_dir target_rel target
+  [[ -f "$marker" ]] || return 0
+  if ! python3 - "$marker" <<'PY'
+import json
+import pathlib
+import sys
+
+try:
+    marker = json.loads(pathlib.Path(sys.argv[1]).read_text())
+except (OSError, json.JSONDecodeError):
+    raise SystemExit(1)
+raise SystemExit(0 if marker.get("addonId") == "documents" else 1)
+PY
+  then
+    warn 'Existing marker is not owned by the Documents addon; obsolete targets were preserved'
+    return 0
+  fi
+
+  timestamp="$(date +%Y%m%d-%H%M%S)"
+  backup_dir="$(dirname -- "$RUNTIME_DIR")/backups/$timestamp"
+  for target_rel in "${OBSOLETE_TARGETS[@]}"; do
+    target="$TARGET_DIR/$target_rel"
+    [[ -e "$target" ]] || continue
+    run mkdir -p "$(dirname -- "$backup_dir/$target_rel")"
+    run cp "$target" "$backup_dir/$target_rel"
+    run rm -f "$target"
+    log "Removed obsolete managed target: $target_rel"
+  done
+}
+
+install_artifact_studio() {
+  local studio="$REPO_DIR/artifact-studio"
+  [[ -f "$studio/pnpm-lock.yaml" ]] || { printf 'Artifact Studio lockfile is missing\n' >&2; exit 1; }
+  if [[ "$DRY_RUN" -eq 1 ]]; then
+    log "Dry-run: would install locked Node dependencies in $studio"
+    return 0
+  fi
+  corepack pnpm --dir "$studio" install --frozen-lockfile
 }
 
 install_runtime() {
@@ -186,16 +247,17 @@ install_diagram_runtime() {
 }
 
 copy_assets() {
-  local timestamp backup_dir rel src dst
+  local timestamp backup_dir mapping source_rel target_rel src dst
   timestamp="$(date +%Y%m%d-%H%M%S)"
-  backup_dir="$TARGET_DIR/.documents-addon-backups/$timestamp"
-  for rel in "${MANAGED_FILES[@]}"; do
-    src="$REPO_DIR/$rel"
-    dst="$TARGET_DIR/$rel"
+  backup_dir="$(dirname -- "$RUNTIME_DIR")/backups/$timestamp"
+  for mapping in "${MANAGED_MAPPINGS[@]}"; do
+    IFS=$'\t' read -r source_rel target_rel <<<"$mapping"
+    src="$REPO_DIR/$source_rel"
+    dst="$TARGET_DIR/$target_rel"
     [[ -f "$src" ]] || { printf 'Managed source missing: %s\n' "$src" >&2; exit 1; }
     if [[ -e "$dst" ]] && ! cmp -s "$src" "$dst"; then
-      run mkdir -p "$(dirname -- "$backup_dir/$rel")"
-      run cp "$dst" "$backup_dir/$rel"
+      run mkdir -p "$(dirname -- "$backup_dir/$target_rel")"
+      run cp "$dst" "$backup_dir/$target_rel"
     fi
     run mkdir -p "$(dirname -- "$dst")"
     run cp "$src" "$dst"
@@ -287,6 +349,8 @@ log "Target dir: $TARGET_DIR"
 log "Runtime dir: $RUNTIME_DIR"
 install_runtime
 install_diagram_runtime
+install_artifact_studio
+remove_obsolete_targets
 copy_assets
 write_marker
 validate_install

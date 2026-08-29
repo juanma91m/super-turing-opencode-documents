@@ -1,7 +1,12 @@
 {
   "schemaVersion": 1,
   "id": "documents",
-  "version": "0.4.0",
+  "version": "1.0.1",
+  "artifactStudio": {
+    "path": "artifact-studio",
+    "node": ">=22",
+    "packageManager": "pnpm@11.24.0"
+  },
   "runtime": {
     "name": "quarto",
     "version": "1.10.18",
@@ -37,5 +42,15 @@
     "documents/templates/trabajo-practico/style.typ",
     "documents/templates/informe-profesional/template.qmd",
     "documents/templates/informe-profesional/style.typ"
+  ],
+  "managedTrees": [
+    { "source": ".opencode/agent", "target": "agents" },
+    { "source": ".opencode/command", "target": "commands" },
+    { "source": ".opencode/skills", "target": "skills" },
+    { "source": ".opencode/tools", "target": "tools" },
+    { "source": ".opencode/lib", "target": "lib" }
+  ],
+  "obsoleteTargets": [
+    "agents/artifact-studio.md"
   ]
 }

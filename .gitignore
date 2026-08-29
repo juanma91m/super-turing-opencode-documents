@@ -4,6 +4,15 @@ __pycache__/
 *.pdf
 *.docx
 *.odt
+*.pptx
+artifact-studio/node_modules/
+artifact-studio/dist/
+artifact-studio/artifacts/output/*
+artifact-studio/artifacts/previews/*
+artifact-studio/artifacts/work/*
+!artifact-studio/artifacts/output/.gitkeep
+!artifact-studio/artifacts/previews/.gitkeep
+!artifact-studio/artifacts/work/.gitkeep
 !documents/reference/
 !documents/reference/reference.odt
 qa/

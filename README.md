@@ -1,7 +1,8 @@
 # super-turing-opencode-documents
 
 Addon portable para OpenCode que convierte contenido bien redactado en
-documentos presentables y listos para entregar.
+documentos presentables y listos para entregar. La generación profesional
+multiformato vive en [Artifact Studio](./artifact-studio/README.md).
 
 ## Qué agrega
 
@@ -16,6 +17,10 @@ documentos presentables y listos para entregar.
 - `reference.odt` propio con A4, tipografías y jerarquía visual coherentes;
 - saltos de página portables entre Typst, DOCX y ODT;
 - páginas de QA visual del PDF y, cuando está LibreOffice, de cada editable.
+- framework TypeScript `Artifact Studio` con `DocumentSpec`, themes, Typst,
+  PptxGenJS, docx.js, Vega-Lite, D2, CLI, tests y QA estructural/visual;
+- overlay OpenCode con agente principal, subagentes delimitados, skills,
+  comandos y custom tools.
 
 El PDF es el artefacto canónico. DOCX y ODT son acompañantes editables y no se
 promete paridad visual exacta entre motores.

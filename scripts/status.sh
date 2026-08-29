@@ -29,13 +29,21 @@ manifest_path, repo_dir, target_dir, runtime_dir = map(pathlib.Path, sys.argv[1:
 data = json.loads(manifest_path.read_text())
 missing = []
 mismatched = []
-for rel in data.get("managedFiles", []):
-    source = repo_dir / rel
-    target = target_dir / rel
+obsolete = []
+managed = [(pathlib.Path(rel), pathlib.Path(rel)) for rel in data.get("managedFiles", [])]
+for tree in data.get("managedTrees", []):
+    source_root = repo_dir / tree["source"]
+    managed.extend((source.relative_to(repo_dir), pathlib.Path(tree["target"]) / source.relative_to(source_root)) for source in source_root.rglob("*") if source.is_file())
+for source_rel, target_rel in managed:
+    source = repo_dir / source_rel
+    target = target_dir / target_rel
     if not target.is_file():
-        missing.append(rel)
+        missing.append(str(target_rel))
     elif source.read_bytes() != target.read_bytes():
-        mismatched.append(rel)
+        mismatched.append(str(target_rel))
+for target_rel in data.get("obsoleteTargets", []):
+    if (target_dir / target_rel).exists():
+        obsolete.append(target_rel)
 
 quarto = runtime_dir / "current/bin/quarto"
 runtime_present = quarto.is_file() and quarto.stat().st_mode & 0o111
@@ -54,6 +62,8 @@ if d2_present:
     ).stdout.strip().removeprefix("v")
 d2_expected_version = data["diagramRuntime"]["version"]
 marker = target_dir / ".opencode-documents-addon.json"
+legacy_backup_dir = target_dir / ".documents-addon-backups"
+studio_ready = (repo_dir / data["artifactStudio"]["path"] / "node_modules/.modules.yaml").is_file()
 
 print(f"addon_id={data['id']}")
 print(f"addon_version={data['version']}")
@@ -66,12 +76,17 @@ print(f"diagram_runtime_expected_version={d2_expected_version}")
 print(f"diagram_runtime_actual_version={d2_actual_version or 'missing'}")
 print(f"managed_files_missing={len(missing)}")
 print(f"managed_files_mismatched={len(mismatched)}")
+print(f"obsolete_targets_present={len(obsolete)}")
+print(f"artifact_studio_dependencies={'ready' if studio_ready else 'missing'}")
+print(f"legacy_backup_residual={'yes' if legacy_backup_dir.exists() else 'no'}")
 for rel in missing:
     print(f"missing={rel}")
 for rel in mismatched:
     print(f"mismatched={rel}")
+for rel in obsolete:
+    print(f"obsolete={rel}")
 
-healthy_assets = not missing and not mismatched and marker.is_file()
+healthy_assets = not missing and not mismatched and not obsolete and marker.is_file() and studio_ready and not legacy_backup_dir.exists()
 healthy_runtime = runtime_present and actual_version == expected_version
 healthy_diagram_runtime = d2_present and d2_actual_version == d2_expected_version
 raise SystemExit(0 if healthy_assets and healthy_runtime and healthy_diagram_runtime else 1)
