@@ -28,6 +28,21 @@ promete paridad visual exacta entre motores.
 El contenido y las correcciones se mantienen en QMD. Los editables no son una
 segunda fuente maestra: se regeneran desde el mismo QMD que produce el PDF.
 
+## Activos organizacionales privados
+
+El addon es genérico y no versiona logos, membretes, paletas ni documentos de
+una organización concreta. Cuando exista una plantilla oficial sensible, el
+archivo debe permanecer en almacenamiento privado machine-local fuera de Git.
+La memoria durable puede conservar únicamente el perfil editorial, un
+identificador, la ruta local, el checksum y las restricciones de uso.
+
+Documenter prioriza esos activos aprobados cuando el contexto organizacional
+coincide, verifica el archivo y su checksum cuando estén registrados, y evita
+copiarlo al addon o al repositorio del proyecto. Si no se pide un formato
+específico, el default para documentos distribuibles es PDF más DOCX editable.
+“Breve” describe economía de información respecto del objetivo; no implica una
+cantidad fija de páginas salvo que el contexto la establezca.
+
 Los diagramas siguen el mismo principio: el archivo `.d2` es la fuente y el
 SVG/PNG es un asset generado. El addon incluye perfiles claros para documentos
 y oscuros para láminas técnicas, además de plantillas de flujo y arquitectura.

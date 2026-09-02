@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.2
+
+- Define resolución contextual de perfiles editoriales y plantillas privadas
+  mediante referencias curadas en memoria durable, sin versionar activos
+  organizacionales en el addon.
+- Usa PDF más DOCX editable como default para documentos distribuibles cuando
+  el usuario no solicita formatos concretos.
+- Interpreta “breve” como economía de información según propósito y audiencia,
+  sin imponer un límite fijo de páginas.
+
 ## 1.0.1
 
 - Agrega la skill `form-design` con criterios reutilizables para formularios,
