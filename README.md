@@ -22,6 +22,10 @@ multiformato vive en [Artifact Studio](./artifact-studio/README.md).
 - overlay OpenCode con agente principal, subagentes delimitados, skills,
   comandos y custom tools.
 
+Las tools `artifact-*` se ocultan globalmente: solo `documenter` y
+`artifact-renderer` acceden al conjunto completo, mientras `visual-qa` recibe
+únicamente preview y validación.
+
 El PDF es el artefacto canónico. DOCX y ODT son acompañantes editables y no se
 promete paridad visual exacta entre motores.
 

@@ -1,6 +1,11 @@
 ---
 description: Read-only visual QA specialist for rendered document and slide previews with structured severity findings.
 mode: subagent
+tools:
+  artifact-render: false
+  artifact-preview: true
+  artifact-validate: true
+  artifact-fonts: false
 permission:
   read: allow
   glob: allow

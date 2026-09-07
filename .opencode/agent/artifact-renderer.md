@@ -1,6 +1,11 @@
 ---
 description: Renders validated DocumentSpec files through Artifact Studio without changing content meaning.
 mode: subagent
+tools:
+  artifact-render: true
+  artifact-preview: true
+  artifact-validate: true
+  artifact-fonts: true
 permission:
   read: allow
   glob: allow

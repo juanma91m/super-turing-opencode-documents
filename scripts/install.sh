@@ -352,6 +352,11 @@ install_diagram_runtime
 install_artifact_studio
 remove_obsolete_targets
 copy_assets
+if [[ "$DRY_RUN" -eq 1 ]]; then
+  python3 "$REPO_DIR/scripts/configure_tool_visibility.py" install --config "$TARGET_DIR/opencode.json" --dry-run
+else
+  python3 "$REPO_DIR/scripts/configure_tool_visibility.py" install --config "$TARGET_DIR/opencode.json"
+fi
 write_marker
 validate_install
 log 'Documents addon installation finished; restart OpenCode to load the skill and command'

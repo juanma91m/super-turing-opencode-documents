@@ -64,6 +64,12 @@ for mapping in "${managed_files[@]}"; do
   fi
 done
 
+if [[ "$DRY_RUN" -eq 1 ]]; then
+  python3 "$REPO_DIR/scripts/configure_tool_visibility.py" uninstall --config "$TARGET_DIR/opencode.json" --dry-run
+else
+  python3 "$REPO_DIR/scripts/configure_tool_visibility.py" uninstall --config "$TARGET_DIR/opencode.json"
+fi
+
 marker="$TARGET_DIR/.opencode-documents-addon.json"
 if [[ "$DRY_RUN" -eq 1 ]]; then
   printf '[dry-run] rm -f %s\n' "$marker"

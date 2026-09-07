@@ -2,6 +2,11 @@
 description: Documenter orchestrates Artifact Studio for professional PDF, PPTX and DOCX generation with validation and visual QA.
 mode: primary
 steps: 40
+tools:
+  artifact-render: true
+  artifact-preview: true
+  artifact-validate: true
+  artifact-fonts: true
 permission:
   bash: deny
   edit: allow

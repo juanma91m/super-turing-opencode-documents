@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.3
+
+- Oculta globalmente las cuatro tools `artifact-*` y las reabre solo en
+  `documenter`, `artifact-renderer` y, para preview/validate, `visual-qa`.
+- El lifecycle instala y retira su propia política de visibilidad sin afectar
+  tools ajenas del `opencode.json` compuesto, y restaura el valor previo de cada
+  tool al desinstalar cuando todavía conserva el valor administrado.
+- Un uninstall sin el archivo de estado propio no altera denegaciones definidas
+  por el usuario ni asume ownership sobre ellas.
+
 ## 1.0.2
 
 - Define resolución contextual de perfiles editoriales y plantillas privadas
