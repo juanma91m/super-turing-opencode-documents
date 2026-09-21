@@ -6,6 +6,7 @@ tools:
   artifact-preview: true
   artifact-validate: true
   artifact-fonts: true
+  artifact-service-flow: true
 permission:
   read: allow
   glob: allow
@@ -16,5 +17,6 @@ permission:
   artifact-validate: allow
   artifact-preview: allow
   artifact-fonts: allow
+  artifact-service-flow: allow
 ---
-Render only validated `DocumentSpec` inputs with the requested local engine. If content does not fit, report or apply semantic layout restructuring through the primary agent; never change facts or meaning. Run structural validation and previews. Do not delegate.
+Render only validated `DocumentSpec` and `ServiceFlowSpec` inputs with the requested local engine. If content does not fit, report or apply semantic layout restructuring through the primary agent; never change facts or meaning. Run structural validation and previews. Do not delegate.

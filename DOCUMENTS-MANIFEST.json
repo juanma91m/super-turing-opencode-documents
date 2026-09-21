@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "documents",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "artifactStudio": {
     "path": "artifact-studio",
     "node": ">=22",
@@ -35,6 +35,7 @@
     "documents/reference/reference.odt",
     "documents/diagrams/templates/flujo-proceso/diagram.d2",
     "documents/diagrams/templates/secuencia/diagram.d2",
+    "documents/diagrams/templates/flujo-servicios/spec.json",
     "documents/diagrams/templates/arquitectura-poster/diagram.d2",
     "documents/diagrams/templates/infografia-neon/diagram.d2",
     "documents/diagrams/templates/infografia-neon/infographic.typ",

@@ -28,7 +28,8 @@ request → storyline → DocumentSpec (Zod) → charts/diagrams
 - `src/theme/`: typed design tokens (`executive-light` default,
   `executive-dark`, `technical-light`).
 - `src/charts/`: chart policy, Vega-Lite → SVG/PNG, and native PPT chart data.
-- `src/diagrams/`: safe DiagramSpec → D2 → SVG pipeline.
+- `src/diagrams/`: safe DiagramSpec → D2 → SVG pipeline plus semantic
+  ServiceFlowSpec → controlled SVG for numbered cross-service narratives.
 - `src/renderers/`: owned Typst template, semantic PPT layouts, editable DOCX,
   and gated optional Gamma adapter.
 - `src/qa/`: OOXML/PDF checks, geometry checks, previews and contact sheets.
@@ -67,6 +68,8 @@ corepack pnpm artifact preview artifacts/output/report.pdf
 corepack pnpm artifact check artifacts/output/deck.pptx
 corepack pnpm artifact validate examples/executive-status/spec.json
 corepack pnpm artifact schema
+corepack pnpm artifact service-flow flow.json --format all
+corepack pnpm artifact service-flow-schema
 ```
 
 CLI inputs and outputs must remain below the current working directory. The
@@ -124,6 +127,12 @@ dependency diagrams; SVG is canonical. Graphviz is optional and Mermaid is an
 interoperability fallback. Lucide SVG assets are loaded only through the
 allowlisted helper in `src/assets/icons/`; emojis are not professional icons.
 
+Numbered flows that move between system or service lanes use `ServiceFlowSpec`.
+The semantic source declares lanes, optional internal components, ordered steps,
+optional code snippets and whether connectors are visible. The renderer owns all
+geometry and produces canonical SVG plus optional high-resolution PNG and a
+single tall PDF page.
+
 ## Themes
 
 Themes centralize colors, typography, spacing, radii, borders, chart palette,
@@ -148,8 +157,8 @@ The repository-local `.opencode/` overlay provides:
   evaluations, worksheets, checklists and other fillable forms;
 - `/report`, `/deck`, `/docx`, `/artifact`, `/artifact-preview`,
   `/artifact-check`;
-- typed tools `artifact-render`, `artifact-preview`, `artifact-validate`, and
-  `artifact-fonts`.
+- typed tools `artifact-render`, `artifact-preview`, `artifact-validate`,
+  `artifact-fonts`, and `artifact-service-flow`.
 
 The addon installer maps these assets into global OpenCode directories without
 overwriting unrelated configuration. Restart OpenCode after installation.

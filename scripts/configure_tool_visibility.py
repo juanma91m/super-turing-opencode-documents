@@ -12,6 +12,7 @@ TOOL_NAMES = (
     "artifact-preview",
     "artifact-validate",
     "artifact-fonts",
+    "artifact-service-flow",
 )
 STATE_FILENAME = ".opencode-documents-tool-visibility.json"
 
@@ -43,6 +44,20 @@ def capture_previous_state(config: dict) -> dict:
             for tool_name in TOOL_NAMES
         },
     }
+
+
+def extend_previous_state(config: dict, previous_state: dict) -> dict:
+    tools = config.get("tools")
+    if not isinstance(tools, dict):
+        tools = {}
+    saved_tools = previous_state.setdefault("tools", {})
+    for tool_name in TOOL_NAMES:
+        if tool_name not in saved_tools:
+            saved_tools[tool_name] = {
+                "present": tool_name in tools,
+                "value": tools.get(tool_name),
+            }
+    return previous_state
 
 
 def install(config: dict) -> None:
@@ -82,7 +97,7 @@ def main() -> int:
     previous_state = None
     if args.command == "install":
         if state_path.exists():
-            previous_state = load_json(state_path)
+            previous_state = extend_previous_state(config, load_json(state_path))
         else:
             previous_state = capture_previous_state(config)
         install(config)
@@ -101,7 +116,7 @@ def main() -> int:
         }, indent=2))
         return 0
 
-    if args.command == "install" and not state_path.exists():
+    if args.command == "install":
         write_json(state_path, previous_state)
     write_json(config_path, config)
     if args.command == "uninstall" and state_path.exists():

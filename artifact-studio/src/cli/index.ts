@@ -7,6 +7,7 @@ import { parseDocumentSpec, documentSpecJsonSchema } from "../spec/index.js";
 import { previewArtifact } from "../qa/visual/index.js";
 import { validateArtifact } from "../qa/structural/index.js";
 import { resolveInside } from "../core/paths.js";
+import { renderServiceFlowFiles, ServiceFlowSpecSchema, serviceFlowJsonSchema, type ServiceFlowFormat } from "../diagrams/service-flow.js";
 
 const program = new Command().name("artifact").description("Artifact Studio CLI").version("1.0.0");
 const invocationRoot = path.resolve(process.env.INIT_CWD ?? process.cwd());
@@ -16,4 +17,6 @@ program.command("validate").argument("<spec>").action(async (specFile) => { cons
 program.command("check").argument("<artifact>").action(async (file) => { const result = await validateArtifact(cliPath(file)); console.log(JSON.stringify(result, null, 2)); if (!result.valid) process.exitCode = 1; });
 program.command("preview").argument("<artifact>").option("-o, --output <dir>", "preview root", "artifacts/previews").action(async (file, options) => console.log(JSON.stringify(await previewArtifact(cliPath(file), cliPath(options.output)), null, 2)));
 program.command("schema").option("-o, --output <file>", "schema output", "artifacts/document-spec.schema.json").action(async (options) => { const output = cliPath(options.output); await writeFile(output, `${JSON.stringify(documentSpecJsonSchema(), null, 2)}\n`); console.log(output); });
+program.command("service-flow").argument("<spec>").option("-f, --format <format>", "svg|png|pdf|all", "svg").option("-o, --output <dir>", "output directory", "artifacts/output").option("--name <name>", "output basename", "service-flow").action(async (specFile, options) => { const format = options.format as ServiceFlowFormat; if (!["svg", "png", "pdf", "all"].includes(format)) throw new Error(`Invalid service-flow format: ${format}`); const spec = ServiceFlowSpecSchema.parse(JSON.parse(await readFile(cliPath(specFile), "utf8"))); const files = await renderServiceFlowFiles(spec, cliPath(options.output), options.name, format); for (const file of files) console.log(file); });
+program.command("service-flow-schema").option("-o, --output <file>", "schema output", "artifacts/service-flow-spec.schema.json").action(async (options) => { const output = cliPath(options.output); await writeFile(output, `${JSON.stringify(serviceFlowJsonSchema(), null, 2)}\n`); console.log(output); });
 await program.parseAsync();

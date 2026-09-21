@@ -12,6 +12,7 @@ multiformato vive en [Artifact Studio](./artifact-studio/README.md).
 - skill `diagramacion-tecnica` y comando `/crear-diagrama`;
 - runtime Quarto fijado e instalado en user-space;
 - runtime D2 fijado para flujos, procesos y arquitecturas reproducibles;
+- renderer semántico SVG para flujos numerados entre servicios;
 - publicación PDF mediante Typst;
 - salida editable DOCX u ODT mediante Quarto/Pandoc;
 - `reference.odt` propio con A4, tipografías y jerarquía visual coherentes;
@@ -23,8 +24,9 @@ multiformato vive en [Artifact Studio](./artifact-studio/README.md).
   comandos y custom tools.
 
 Las tools `artifact-*` se ocultan globalmente: solo `documenter` y
-`artifact-renderer` acceden al conjunto completo, mientras `visual-qa` recibe
-únicamente preview y validación.
+`artifact-renderer` acceden al conjunto completo, incluido
+`artifact-service-flow`, mientras `visual-qa` recibe únicamente preview y
+validación.
 
 El PDF es el artefacto canónico. DOCX y ODT son acompañantes editables y no se
 promete paridad visual exacta entre motores.
@@ -98,6 +100,21 @@ python3 ~/.config/opencode/scripts/render_diagram.py \
 
 Usar `--profile poster-dark` para una lámina técnica oscura y `--format both`
 cuando también se requiera PNG de alta resolución.
+
+Para un flujo numerado entre servicios:
+
+```bash
+corepack pnpm --dir artifact-studio artifact service-flow \
+  ./entrega/assets/diagrams/flujo/spec.json \
+  --output ./entrega/assets/generated \
+  --name flujo \
+  --format all
+```
+
+La plantilla `documents/diagrams/templates/flujo-servicios/spec.json` modela
+carriles, componentes y pasos sin coordenadas. El resultado incluye SVG
+canónico, PNG de alta resolución y PDF de una página alta. Las flechas se pueden
+activar o desactivar mediante `connectors` sin cambiar la secuencia numerada.
 
 La plantilla `infografia-neon` se genera en dos pasos: primero su `diagram.png`
 con `render_diagram.py --profile neon-blueprint` y luego la lámina completa con

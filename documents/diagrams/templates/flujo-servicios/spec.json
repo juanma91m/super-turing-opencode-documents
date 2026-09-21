@@ -1,0 +1,45 @@
+{
+  "version": "1.0",
+  "title": "Flujo entre servicios",
+  "subtitle": "Ejemplo reusable de un proceso distribuido",
+  "connectors": true,
+  "lanes": [
+    {
+      "id": "origen",
+      "title": "Servicio de origen",
+      "components": []
+    },
+    {
+      "id": "plataforma",
+      "title": "Plataforma",
+      "components": ["Frontend", "Backend"]
+    },
+    {
+      "id": "destino",
+      "title": "Servicio de destino",
+      "components": []
+    }
+  ],
+  "steps": [
+    {
+      "lane": "plataforma",
+      "actor": "Frontend",
+      "text": "El usuario inicia la operación.",
+      "code": "GET /api/recurso"
+    },
+    {
+      "lane": "plataforma",
+      "actor": "Backend",
+      "text": "Valida la solicitud y prepara la integración."
+    },
+    {
+      "lane": "origen",
+      "text": "Obtiene la información requerida y devuelve el resultado."
+    },
+    {
+      "lane": "destino",
+      "text": "Crea la sesión y muestra la vista final.",
+      "code": "https://ejemplo.invalid/#/inicio"
+    }
+  ]
+}

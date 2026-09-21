@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.4
+
+- Agrega `ServiceFlowSpec`, un modelo semántico sin coordenadas para flujos
+  numerados que avanzan entre carriles de servicios o sistemas.
+- Incorpora renderer local SVG con PNG de alta resolución y PDF de una página
+  alta, incluyendo variante configurable con o sin conectores.
+- Expone `artifact-service-flow` únicamente a `documenter` y
+  `artifact-renderer`, suma una plantilla reusable y amplía tests y
+  documentación sin dependencias externas nuevas.
+
 ## 1.0.3
 
 - Oculta globalmente las cuatro tools `artifact-*` y las reabre solo en

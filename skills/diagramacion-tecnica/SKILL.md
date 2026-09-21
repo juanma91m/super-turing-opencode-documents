@@ -26,11 +26,13 @@ No usar capturas manuales de editores como fuente canónica.
 
 - `~/.config/opencode/documents/diagrams/templates/flujo-proceso/`
 - `~/.config/opencode/documents/diagrams/templates/secuencia/`
+- `~/.config/opencode/documents/diagrams/templates/flujo-servicios/`
 - `~/.config/opencode/documents/diagrams/templates/arquitectura-poster/`
 - `~/.config/opencode/documents/diagrams/templates/infografia-neon/`
 
-Copiar la plantilla elegida a `assets/diagrams/<nombre>/`, editar `diagram.d2`
-y conservar ese archivo junto a los resultados.
+Copiar la plantilla elegida a `assets/diagrams/<nombre>/` y conservar la fuente
+junto a los resultados. Las plantillas D2 usan `diagram.d2`; `flujo-servicios`
+usa un `ServiceFlowSpec` en `spec.json`, sin coordenadas de renderer.
 
 ## Render aprobado
 
@@ -106,13 +108,38 @@ cada etiqueta del dibujo: explicar su propósito, decisiones y excepciones.
 - usar `neon-blueprint` para una infografía técnica completa, no como estilo
   predeterminado de cada figura de un informe.
 
+## Flujo numerado entre servicios
+
+Usar `flujo-servicios` cuando el relato avance por columnas de sistemas o
+servicios y cada paso necesite una tarjeta numerada, texto narrativo y un bloque
+técnico opcional. Definir en `spec.json`:
+
+- `lanes`: servicios y componentes internos visibles en el encabezado;
+- `steps`: secuencia ordenada, carril, actor, explicación y `code` opcional;
+- `connectors`: `true` para flechas o `false` cuando la numeración sea suficiente.
+
+Desde Artifact Studio:
+
+```bash
+corepack pnpm --dir ~/.local/src/super-turing-opencode-documents/artifact-studio \
+  artifact service-flow assets/diagrams/flujo/spec.json \
+  --output assets/generated \
+  --name flujo-servicios \
+  --format all
+```
+
+El renderer genera siempre SVG canónico, además de PNG y un PDF de página alta
+cuando se pide `all`. Para insertar un flujo muy extenso en un informe, preferir
+el PDF independiente o dividirlo en fases antes que reducirlo hasta volver
+ilegible el texto.
+
 ## Quality gate
 
-1. Renderizar desde la fuente D2, nunca editar el SVG generado a mano.
+1. Renderizar desde la fuente D2 o `ServiceFlowSpec`, nunca editar el SVG generado a mano.
 2. Abrir el SVG o PNG y revisar conexiones, etiquetas, cortes y contraste.
 3. Publicar el documento completo.
 4. Revisar el diagrama en todas las páginas de QA del PDF y del editable.
-5. Corregir `diagram.d2`, regenerar y volver a publicar.
+5. Corregir `diagram.d2` o `spec.json`, regenerar y volver a publicar.
 
 Si un SVG se ve correcto en Typst pero cambia colores o rellenos en LibreOffice,
 no retocar el ODT: reemplazar la referencia del QMD por el PNG generado.

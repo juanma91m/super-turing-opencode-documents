@@ -1,0 +1,85 @@
+{
+  "version": "1.0",
+  "title": "Ejemplo de autenticación entre servicios",
+  "subtitle": "Flujo ilustrativo con navegación, validaciones y canje por backchannel",
+  "connectors": true,
+  "lanes": [
+    {
+      "id": "identity",
+      "title": "Identidad",
+      "components": []
+    },
+    {
+      "id": "platform",
+      "title": "Plataforma",
+      "components": ["Frontend", "Backend"]
+    },
+    {
+      "id": "external",
+      "title": "Servicio externo",
+      "components": []
+    }
+  ],
+  "steps": [
+    {
+      "lane": "platform",
+      "actor": "Frontend",
+      "text": "El usuario inicia el acceso al servicio externo.",
+      "code": "GET /api/external/access"
+    },
+    {
+      "lane": "platform",
+      "actor": "Backend",
+      "text": "Valida la sesión y la elegibilidad de la cuenta."
+    },
+    {
+      "lane": "external",
+      "text": "Detecta que no existe una sesión activa y solicita autenticación.",
+      "code": "/#/auth/login"
+    },
+    {
+      "lane": "identity",
+      "text": "Autentica al usuario y devuelve el control a la plataforma."
+    },
+    {
+      "lane": "platform",
+      "actor": "Backend",
+      "text": "Genera un código opaco, breve y de un solo uso."
+    },
+    {
+      "lane": "platform",
+      "actor": "Backend",
+      "text": "Persiste el hash, el vencimiento y el estado no consumido."
+    },
+    {
+      "lane": "platform",
+      "actor": "Frontend",
+      "text": "Redirige el navegador hacia la callback externa.",
+      "code": "HTTP 302 /callback?code=<code>"
+    },
+    {
+      "lane": "external",
+      "text": "Recibe el código y solicita su canje mediante el canal servidor a servidor.",
+      "code": "POST /api/code/redeem"
+    },
+    {
+      "lane": "platform",
+      "actor": "Backend",
+      "text": "Valida el código y lo consume mediante una operación atómica."
+    },
+    {
+      "lane": "identity",
+      "text": "Emite credenciales frescas para la sesión solicitada."
+    },
+    {
+      "lane": "platform",
+      "actor": "Backend",
+      "text": "Devuelve las credenciales únicamente por backchannel."
+    },
+    {
+      "lane": "external",
+      "text": "Crea la sesión y abre la vista final sin credenciales en la URL.",
+      "code": "https://servicio.example/#/dashboard"
+    }
+  ]
+}
