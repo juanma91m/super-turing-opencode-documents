@@ -1,0 +1,22 @@
+{
+  "version": "1.0",
+  "title": "Secuencia entre servicios",
+  "subtitle": "Ejemplo reusable con lifelines y pasos narrados",
+  "participants": [
+    { "id": "usuario", "title": "Usuario", "kind": "actor" },
+    { "id": "frontend", "title": "Frontend", "subtitle": "Aplicación web", "group": "PLATAFORMA", "kind": "service" },
+    { "id": "backend", "title": "Backend", "subtitle": "API", "group": "PLATAFORMA", "kind": "service" },
+    { "id": "database", "title": "Base de datos", "kind": "database" },
+    { "id": "external", "title": "Servicio externo", "kind": "service" }
+  ],
+  "steps": [
+    { "from": "usuario", "to": "frontend", "kind": "navigation", "status": "existing", "text": "El usuario inicia la operación." },
+    { "from": "frontend", "to": "backend", "kind": "message", "status": "new", "text": "El frontend solicita autorización.", "code": "POST /api/authorize" },
+    { "from": "backend", "to": "backend", "kind": "internal", "status": "new", "text": "El backend valida identidad y permisos." },
+    { "from": "backend", "to": "database", "kind": "persistence", "status": "new", "text": "Persiste el estado de la operación." },
+    { "from": "backend", "to": "external", "kind": "message", "status": "existing", "text": "Solicita el recurso al servicio externo.", "code": "GET /api/resource" },
+    { "from": "external", "to": "backend", "kind": "message", "status": "existing", "text": "Devuelve el resultado." },
+    { "from": "backend", "to": "frontend", "kind": "message", "status": "new", "text": "Comunica el resultado al frontend." }
+  ],
+  "notes": ["El ejemplo usa datos y endpoints ilustrativos."]
+}

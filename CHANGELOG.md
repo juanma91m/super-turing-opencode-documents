@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.5
+
+- Agrega `NarratedSequenceSpec` para secuencias técnicas extensas con lifelines,
+  mensajes, self-actions, persistencia, estados, código, advertencias y notas.
+- Incorpora `artifact-narrated-sequence` con salidas SVG, PNG y PDF alto, sin
+  ampliar permisos de shell ni agregar dependencias externas.
+- Suma plantilla, ejemplo, JSON Schema y tests para el nuevo contrato semántico.
+
 ## 1.0.4
 
 - Agrega `ServiceFlowSpec`, un modelo semántico sin coordenadas para flujos

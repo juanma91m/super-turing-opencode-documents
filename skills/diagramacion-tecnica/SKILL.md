@@ -26,6 +26,7 @@ No usar capturas manuales de editores como fuente canónica.
 
 - `~/.config/opencode/documents/diagrams/templates/flujo-proceso/`
 - `~/.config/opencode/documents/diagrams/templates/secuencia/`
+- `~/.config/opencode/documents/diagrams/templates/secuencia-narrada/`
 - `~/.config/opencode/documents/diagrams/templates/flujo-servicios/`
 - `~/.config/opencode/documents/diagrams/templates/arquitectura-poster/`
 - `~/.config/opencode/documents/diagrams/templates/infografia-neon/`
@@ -33,6 +34,7 @@ No usar capturas manuales de editores como fuente canónica.
 Copiar la plantilla elegida a `assets/diagrams/<nombre>/` y conservar la fuente
 junto a los resultados. Las plantillas D2 usan `diagram.d2`; `flujo-servicios`
 usa un `ServiceFlowSpec` en `spec.json`, sin coordenadas de renderer.
+`secuencia-narrada` usa un `NarratedSequenceSpec` con participantes y pasos.
 
 ## Render aprobado
 
@@ -133,9 +135,24 @@ cuando se pide `all`. Para insertar un flujo muy extenso en un informe, preferir
 el PDF independiente o dividirlo en fases antes que reducirlo hasta volver
 ilegible el texto.
 
+## Secuencia técnica narrada
+
+Usar `secuencia-narrada` cuando una interacción temporal necesite lifelines,
+mensajes entre participantes, procesamiento interno, persistencia, estados como
+`EXISTENTE` o `NUEVO`, bloques técnicos y notas. Definir participantes y pasos
+en `spec.json`; el renderer decide toda la geometría.
+
+```bash
+corepack pnpm --dir ~/.local/src/super-turing-opencode-documents/artifact-studio \
+  artifact narrated-sequence assets/diagrams/secuencia/spec.json \
+  --output assets/generated \
+  --name secuencia-narrada \
+  --format all
+```
+
 ## Quality gate
 
-1. Renderizar desde la fuente D2 o `ServiceFlowSpec`, nunca editar el SVG generado a mano.
+1. Renderizar desde la fuente D2, `ServiceFlowSpec` o `NarratedSequenceSpec`; nunca editar el SVG generado a mano.
 2. Abrir el SVG o PNG y revisar conexiones, etiquetas, cortes y contraste.
 3. Publicar el documento completo.
 4. Revisar el diagrama en todas las páginas de QA del PDF y del editable.

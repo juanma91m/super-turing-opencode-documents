@@ -13,6 +13,7 @@ TOOL_NAMES = (
     "artifact-validate",
     "artifact-fonts",
     "artifact-service-flow",
+    "artifact-narrated-sequence",
 )
 STATE_FILENAME = ".opencode-documents-tool-visibility.json"
 

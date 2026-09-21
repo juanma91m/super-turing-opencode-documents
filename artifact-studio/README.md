@@ -30,6 +30,7 @@ request → storyline → DocumentSpec (Zod) → charts/diagrams
 - `src/charts/`: chart policy, Vega-Lite → SVG/PNG, and native PPT chart data.
 - `src/diagrams/`: safe DiagramSpec → D2 → SVG pipeline plus semantic
   ServiceFlowSpec → controlled SVG for numbered cross-service narratives.
+  NarratedSequenceSpec adds controlled lifeline sequences with rich annotations.
 - `src/renderers/`: owned Typst template, semantic PPT layouts, editable DOCX,
   and gated optional Gamma adapter.
 - `src/qa/`: OOXML/PDF checks, geometry checks, previews and contact sheets.
@@ -70,6 +71,8 @@ corepack pnpm artifact validate examples/executive-status/spec.json
 corepack pnpm artifact schema
 corepack pnpm artifact service-flow flow.json --format all
 corepack pnpm artifact service-flow-schema
+corepack pnpm artifact narrated-sequence sequence.json --format all
+corepack pnpm artifact narrated-sequence-schema
 ```
 
 CLI inputs and outputs must remain below the current working directory. The
@@ -133,6 +136,11 @@ optional code snippets and whether connectors are visible. The renderer owns all
 geometry and produces canonical SVG plus optional high-resolution PNG and a
 single tall PDF page.
 
+Detailed technical sequences use `NarratedSequenceSpec`: participants may be
+grouped, steps distinguish navigation, messages, self-actions and persistence,
+and each step may include lifecycle status, code and a highlighted note. The
+renderer owns lifeline geometry and produces SVG, PNG and a tall single-page PDF.
+
 ## Themes
 
 Themes centralize colors, typography, spacing, radii, borders, chart palette,
@@ -158,7 +166,8 @@ The repository-local `.opencode/` overlay provides:
 - `/report`, `/deck`, `/docx`, `/artifact`, `/artifact-preview`,
   `/artifact-check`;
 - typed tools `artifact-render`, `artifact-preview`, `artifact-validate`,
-  `artifact-fonts`, and `artifact-service-flow`.
+  `artifact-fonts`, `artifact-service-flow`, and
+  `artifact-narrated-sequence`, restricted to the relevant rendering agents.
 
 The addon installer maps these assets into global OpenCode directories without
 overwriting unrelated configuration. Restart OpenCode after installation.

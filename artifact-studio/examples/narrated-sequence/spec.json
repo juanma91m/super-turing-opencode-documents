@@ -1,0 +1,23 @@
+{
+  "version": "1.0",
+  "title": "Ejemplo de secuencia narrada",
+  "subtitle": "Interacción ilustrativa entre usuario, plataforma y proveedor",
+  "participants": [
+    { "id": "user", "title": "Usuario", "kind": "actor" },
+    { "id": "web", "title": "Aplicación web", "group": "PLATAFORMA", "kind": "service" },
+    { "id": "api", "title": "API", "group": "PLATAFORMA", "kind": "service" },
+    { "id": "db", "title": "Base de datos", "kind": "database" },
+    { "id": "provider", "title": "Proveedor", "kind": "service" }
+  ],
+  "steps": [
+    { "from": "user", "to": "web", "kind": "navigation", "status": "existing", "text": "El usuario inicia la operación." },
+    { "from": "web", "to": "api", "kind": "message", "status": "new", "text": "La aplicación solicita autorización.", "code": "POST /api/authorize" },
+    { "from": "api", "to": "api", "kind": "internal", "status": "new", "text": "La API valida identidad, permisos y vigencia." },
+    { "from": "api", "to": "db", "kind": "persistence", "status": "new", "text": "Guarda el estado pendiente." },
+    { "from": "api", "to": "provider", "kind": "message", "status": "configuration", "text": "Solicita el recurso al proveedor.", "code": "GET /external/resource", "note": "El contrato externo debe confirmarse." },
+    { "from": "provider", "to": "api", "kind": "message", "status": "existing", "text": "El proveedor devuelve el recurso." },
+    { "from": "api", "to": "web", "kind": "message", "status": "new", "text": "La API devuelve el resultado." },
+    { "from": "web", "to": "web", "kind": "internal", "status": "existing", "text": "La aplicación actualiza la vista." }
+  ],
+  "notes": ["Todos los datos del ejemplo son ilustrativos."]
+}

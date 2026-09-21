@@ -13,6 +13,7 @@ multiformato vive en [Artifact Studio](./artifact-studio/README.md).
 - runtime Quarto fijado e instalado en user-space;
 - runtime D2 fijado para flujos, procesos y arquitecturas reproducibles;
 - renderer semántico SVG para flujos numerados entre servicios;
+- renderer de secuencias narradas con lifelines y anotaciones técnicas;
 - publicación PDF mediante Typst;
 - salida editable DOCX u ODT mediante Quarto/Pandoc;
 - `reference.odt` propio con A4, tipografías y jerarquía visual coherentes;
@@ -25,8 +26,8 @@ multiformato vive en [Artifact Studio](./artifact-studio/README.md).
 
 Las tools `artifact-*` se ocultan globalmente: solo `documenter` y
 `artifact-renderer` acceden al conjunto completo, incluido
-`artifact-service-flow`, mientras `visual-qa` recibe únicamente preview y
-validación.
+`artifact-service-flow` y `artifact-narrated-sequence`, mientras `visual-qa`
+recibe únicamente preview y validación.
 
 El PDF es el artefacto canónico. DOCX y ODT son acompañantes editables y no se
 promete paridad visual exacta entre motores.
@@ -115,6 +116,20 @@ La plantilla `documents/diagrams/templates/flujo-servicios/spec.json` modela
 carriles, componentes y pasos sin coordenadas. El resultado incluye SVG
 canónico, PNG de alta resolución y PDF de una página alta. Las flechas se pueden
 activar o desactivar mediante `connectors` sin cambiar la secuencia numerada.
+
+Para una secuencia técnica extensa con lifelines:
+
+```bash
+corepack pnpm --dir artifact-studio artifact narrated-sequence \
+  ./entrega/assets/diagrams/secuencia/spec.json \
+  --output ./entrega/assets/generated \
+  --name secuencia \
+  --format all
+```
+
+La plantilla `documents/diagrams/templates/secuencia-narrada/spec.json` modela
+participantes, agrupaciones, mensajes, procesamiento interno, persistencia,
+estados y notas sin coordenadas manuales.
 
 La plantilla `infografia-neon` se genera en dos pasos: primero su `diagram.png`
 con `render_diagram.py --profile neon-blueprint` y luego la lámina completa con
