@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.0.6
+
+- Agrega entrega transaccional last-good y receipts SHA-256 para
+  `ServiceFlowSpec` y `NarratedSequenceSpec`, con diagnósticos deterministas.
+- Incorpora `artifact verify-receipt` y la tool acotada
+  `artifact-verify-receipt` para detectar artefactos o specs faltantes,
+  modificados, inválidos o reemplazados por symlinks.
+- Resuelve los artefactos junto al receipt para mantener portabilidad sin seguir
+  rutas externas declaradas por JSON no confiable.
+- Extiende `artifact check` a SVG con geometría medida en Chrome/Chromium sobre
+  una copia sanitizada: bounds de texto, canvas, grupos semánticos y overlaps;
+  el navegador sigue siendo una dependencia opcional.
+- Corrige el patrón `qa/` del `.gitignore` para que no oculte el código fuente
+  bajo `artifact-studio/src/qa/` y mantenga ignorado solo el QA generado en raíz.
+- Agrega cuatro casos end-to-end reproducibles para `documenter`, cada uno con
+  spec semántico y prompt de render, receipt, browser QA y revisión perceptual.
+
 ## 1.0.5
 
 - Agrega `NarratedSequenceSpec` para secuencias técnicas extensas con lifelines,

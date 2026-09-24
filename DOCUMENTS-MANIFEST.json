@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "documents",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "artifactStudio": {
     "path": "artifact-studio",
     "node": ">=22",

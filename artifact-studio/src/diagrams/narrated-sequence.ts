@@ -1,10 +1,12 @@
 import path from "node:path";
 import os from "node:os";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import sharp from "sharp";
 import { z } from "zod";
 import { ensureDir, executable } from "../core/paths.js";
 import { run } from "../core/process.js";
+import { deliverDiagram, DiagramDeliveryError, specificationBytes, type DiagramDeliveryOptions } from "./delivery.js";
+import { check, errorDiagnostic, estimateTextWidth, validateSvgComposition } from "./validation.js";
 
 const IdSchema = z.string().regex(/^[A-Za-z][A-Za-z0-9_-]*$/);
 const TextSchema = z.string().min(1);
@@ -56,7 +58,12 @@ function wrapText(value: string, maxChars: number): string[] { return value.spli
 function textBlock(lines: string[], x: number, y: number, size: number, lineHeight: number, options: { weight?: number; family?: string; fill?: string; anchor?: "start" | "middle"; italic?: boolean } = {}): string { const tspans = lines.map((line, index) => `<tspan x="${x}" dy="${index ? lineHeight : 0}">${escapeXml(line)}</tspan>`).join(""); return `<text x="${x}" y="${y}" text-anchor="${options.anchor ?? "middle"}" font-family="${options.family ?? FONT_SANS}" font-size="${size}" font-weight="${options.weight ?? 400}"${options.italic ? ' font-style="italic"' : ""} fill="${options.fill ?? "#30343B"}">${tspans}</text>`; }
 
 interface StepLayout { y: number; height: number; fromIndex: number; toIndex: number; textLines: string[]; codeLines: string[]; noteLines: string[]; textWidth: number; }
-export interface NarratedSequenceRender { svg: string; width: number; height: number; }
+export interface NarratedSequenceRender {
+  svg: string;
+  width: number;
+  height: number;
+  validation: ReturnType<typeof validateSvgComposition>;
+}
 
 export function renderNarratedSequenceSvg(input: unknown): NarratedSequenceRender {
   const spec = NarratedSequenceSpecSchema.parse(input);
@@ -72,7 +79,11 @@ export function renderNarratedSequenceSvg(input: unknown): NarratedSequenceRende
   for (const step of spec.steps) {
     const fromIndex = spec.participants.findIndex((p) => p.id === step.from), toIndex = spec.participants.findIndex((p) => p.id === step.to);
     const span = Math.abs(centers[toIndex] - centers[fromIndex]);
-    const textWidth = fromIndex === toIndex ? 320 : Math.max(250, Math.min(520, span - 42));
+    const neighborIndex = fromIndex < spec.participants.length - 1 ? fromIndex + 1 : fromIndex - 1;
+    const neighborSpan = Math.abs(centers[neighborIndex] - centers[fromIndex]);
+    const textWidth = fromIndex === toIndex
+      ? Math.max(180, Math.min(260, neighborSpan - 48))
+      : Math.max(250, Math.min(520, span - 42));
     const textLines = wrapText(step.text, Math.max(24, Math.floor(textWidth / 8)));
     const codeLines = step.code ? wrapText(step.code, Math.max(22, Math.floor((textWidth - 24) / 8.2))) : [];
     const noteLines = step.note ? wrapText(step.note, Math.max(25, Math.floor(textWidth / 7.5))) : [];
@@ -93,10 +104,19 @@ export function renderNarratedSequenceSvg(input: unknown): NarratedSequenceRende
     const accent = step.kind === "navigation", dashed = step.kind === "internal" || step.kind === "persistence", color = accent ? "#E66F00" : "#4B5058", marker = accent ? "sequence-arrow-accent" : "sequence-arrow-dark";
     parts.push(`<line x1="${margin}" y1="${layout.y + layout.height - 1}" x2="${width - margin}" y2="${layout.y + layout.height - 1}" stroke="#E7E9EC"/>`, `<g class="narrated-sequence-step" data-step="${index + 1}">`);
     let textX: number;
-    if (layout.fromIndex === layout.toIndex) { const right = layout.fromIndex < spec.participants.length - 1, loop = right ? 64 : -64; parts.push(`<path d="M ${x1} ${y} H ${x1 + loop} V ${y + 34} H ${x1 + (right ? 5 : -5)}" fill="none" stroke="${color}" stroke-width="2.2"${dashed ? ' stroke-dasharray="7 6"' : ""} marker-end="url(#${marker})"/>`); textX = x1 + (right ? 190 : -190); } else { const endOffset = x2 > x1 ? -7 : 7; parts.push(`<line x1="${x1}" y1="${y}" x2="${x2 + endOffset}" y2="${y}" stroke="${color}" stroke-width="2.2"${dashed ? ' stroke-dasharray="7 6"' : ""} marker-end="url(#${marker})"/>`); textX = (x1 + x2) / 2; }
+    if (layout.fromIndex === layout.toIndex) { const right = layout.fromIndex < spec.participants.length - 1, loop = right ? 64 : -64, neighbor = centers[layout.fromIndex + (right ? 1 : -1)]; parts.push(`<path d="M ${x1} ${y} H ${x1 + loop} V ${y + 34} H ${x1 + (right ? 5 : -5)}" fill="none" stroke="${color}" stroke-width="2.2"${dashed ? ' stroke-dasharray="7 6"' : ""} marker-end="url(#${marker})"/>`); textX = (x1 + neighbor) / 2; } else { const endOffset = x2 > x1 ? -7 : 7; parts.push(`<line x1="${x1}" y1="${y}" x2="${x2 + endOffset}" y2="${y}" stroke="${color}" stroke-width="2.2"${dashed ? ' stroke-dasharray="7 6"' : ""} marker-end="url(#${marker})"/>`); textX = (x1 + x2) / 2; }
     parts.push(`<circle cx="${x1}" cy="${y}" r="15" fill="#4B5058"/>`, textBlock([String(index + 1)], x1, y + 5, 12, 14, { weight: 700, fill: "#FFFFFF" }));
     let textY = y + 40;
+    const annotationTop = y + 20;
+    const annotationBottom = layout.y + layout.height - 2;
+    const firstIntermediate = Math.min(layout.fromIndex, layout.toIndex) + 1;
+    const lastIntermediate = Math.max(layout.fromIndex, layout.toIndex);
+    for (let participantIndex = firstIntermediate; participantIndex < lastIntermediate; participantIndex += 1) {
+      parts.push(`<rect class="sequence-route-mask" x="${centers[participantIndex] - 5}" y="${annotationTop}" width="10" height="${annotationBottom - annotationTop}" fill="#FFFFFF"/>`);
+    }
     if (step.status) { const label = step.statusLabel ?? STATUS_LABELS[step.status], badgeWidth = Math.max(58, label.length * 7 + 18), badgeFill = step.status === "new" ? "#E66F00" : "#FFFFFF", badgeStroke = step.status === "configuration" ? "#E66F00" : "#656B72", badgeText = step.status === "new" ? "#FFFFFF" : step.status === "configuration" ? "#D56500" : "#4B5058"; parts.push(`<rect x="${textX - badgeWidth / 2}" y="${textY - 18}" width="${badgeWidth}" height="22" rx="5" fill="${badgeFill}" stroke="${badgeStroke}"${step.status === "configuration" ? ' stroke-dasharray="5 4"' : ""}/>`, textBlock([label], textX, textY - 3, 10, 12, { weight: 700, fill: badgeText })); textY += 24; }
+    const messageLabelWidth = Math.min(layout.textWidth, Math.max(...layout.textLines.map((line) => estimateTextWidth(line, 14))) + 24);
+    parts.push(`<rect class="sequence-message-mask" x="${textX - messageLabelWidth / 2}" y="${textY - 17}" width="${messageLabelWidth}" height="${layout.textLines.length * 20 + 8}" rx="4" fill="#FFFFFF"/>`);
     parts.push(textBlock(layout.textLines, textX, textY, 14, 20)); textY += layout.textLines.length * 20 + 12;
     if (layout.codeLines.length) { const boxHeight = layout.codeLines.length * 19 + 14; parts.push(`<rect x="${textX - layout.textWidth / 2}" y="${textY - 13}" width="${layout.textWidth}" height="${boxHeight}" rx="5" fill="#F7F8F8" stroke="#6A7078"/>`, textBlock(layout.codeLines, textX, textY + 3, 12, 19, { family: FONT_MONO })); textY += boxHeight + 4; }
     if (layout.noteLines.length) parts.push(textBlock(layout.noteLines, textX, textY, 11, 18, { weight: 600, fill: "#D56500", italic: true }));
@@ -104,9 +124,122 @@ export function renderNarratedSequenceSvg(input: unknown): NarratedSequenceRende
   });
   const legendY = cursorY + 22; parts.push(textBlock(["Referencias"], margin, legendY, 16, 18, { weight: 700, anchor: "start" }), `<line x1="${margin}" y1="${legendY + 27}" x2="${margin + 54}" y2="${legendY + 27}" stroke="#E66F00" stroke-width="3"/>`, textBlock(["Navegación del usuario o flujo principal"], margin + 68, legendY + 32, 12, 15, { anchor: "start" }), `<line x1="${margin}" y1="${legendY + 51}" x2="${margin + 54}" y2="${legendY + 51}" stroke="#4B5058" stroke-width="3"/>`, textBlock(["Llamada servidor a servidor"], margin + 68, legendY + 56, 12, 15, { anchor: "start" }), `<line x1="${margin}" y1="${legendY + 75}" x2="${margin + 54}" y2="${legendY + 75}" stroke="#4B5058" stroke-width="3" stroke-dasharray="7 6"/>`, textBlock(["Persistencia o procesamiento interno"], margin + 68, legendY + 80, 12, 15, { anchor: "start" }));
   if (spec.notes.length) { const notesX = width / 2; parts.push(textBlock(["Notas"], notesX, legendY, 16, 18, { weight: 700, anchor: "start" })); spec.notes.forEach((note, index) => parts.push(textBlock([`• ${note}`], notesX, legendY + 26 + index * 22, 12, 15, { anchor: "start" }))); }
-  parts.push("</svg>"); return { svg: `${parts.join("\n")}\n`, width, height };
+  parts.push("</svg>");
+  const svg = `${parts.join("\n")}\n`;
+  const diagnostics = [];
+  for (const participant of spec.participants) {
+    const titleLines = wrapText(participant.title, 20);
+    const subtitleLines = participant.subtitle ? wrapText(participant.subtitle, 24) : [];
+    if (titleLines.length > 2 || subtitleLines.length > 1) diagnostics.push(errorDiagnostic(
+      "composition/label-fit",
+      "A participant label exceeds the fixed sequence header.",
+      { participant: participant.id },
+      { titleLines: titleLines.length, subtitleLines: subtitleLines.length, maxTitleLines: 2, maxSubtitleLines: 1 },
+      ["shorten the participant title or move supporting detail into a sequence note"],
+    ));
+  }
+  for (const [group, indices] of groups) {
+    const groupWidth = centers[Math.max(...indices)] - centers[Math.min(...indices)] + participantWidth;
+    const estimatedWidth = estimateTextWidth(group.toUpperCase(), 12);
+    if (estimatedWidth > groupWidth - 20) diagnostics.push(errorDiagnostic(
+      "composition/label-fit",
+      "A participant-group label exceeds its available width.",
+      { group },
+      { estimatedWidth: Math.round(estimatedWidth), availableWidth: Math.round(groupWidth - 20) },
+      ["shorten the group label while preserving its ownership meaning"],
+    ));
+  }
+  const messageCount = svg.match(/class="narrated-sequence-step"/g)?.length ?? 0;
+  const messageMaskCount = svg.match(/class="sequence-message-mask"/g)?.length ?? 0;
+  const routeMaskCount = svg.match(/class="sequence-route-mask"/g)?.length ?? 0;
+  const expectedRouteMasks = layouts.reduce((total, layout) => total + Math.max(0, Math.abs(layout.toIndex - layout.fromIndex) - 1), 0);
+  const validation = validateSvgComposition({
+    kind: "narrated-sequence",
+    svg,
+    width,
+    height,
+    semanticClass: "narrated-sequence-step",
+    expectedSemanticCount: spec.steps.length,
+    extraChecks: [
+      check("label_fit", diagnostics.length === 0),
+      check("message_count", messageCount === spec.steps.length, [`${messageCount}/${spec.steps.length} messages`]),
+      check("message_label_masks", messageMaskCount === spec.steps.length, [`${messageMaskCount}/${spec.steps.length} masks`]),
+      check("intermediate_route_masks", routeMaskCount === expectedRouteMasks, [`${routeMaskCount}/${expectedRouteMasks} masks`]),
+    ],
+    extraDiagnostics: [
+      ...diagnostics,
+      ...(messageCount === spec.steps.length ? [] : [errorDiagnostic(
+        "artifact/message-count",
+        "The generated SVG does not contain every authored sequence message.",
+        { diagram: "narrated-sequence" },
+        { expected: spec.steps.length, actual: messageCount },
+        ["restore the missing message and regenerate"],
+      )]),
+      ...(messageMaskCount === spec.steps.length ? [] : [errorDiagnostic(
+        "composition/message-label-clearance",
+        "A sequence message is missing its renderer-owned route-clearance mask.",
+        { diagram: "narrated-sequence" },
+        { expected: spec.steps.length, actual: messageMaskCount },
+        ["restore the message label mask and regenerate"],
+      )]),
+      ...(routeMaskCount === expectedRouteMasks ? [] : [errorDiagnostic(
+        "composition/intermediate-route-clearance",
+        "A sequence annotation is missing renderer-owned clearance over an intermediate lifeline.",
+        { diagram: "narrated-sequence" },
+        { expected: expectedRouteMasks, actual: routeMaskCount },
+        ["restore intermediate route masks and regenerate"],
+      )]),
+    ],
+  });
+  return { svg, width, height, validation };
 }
 
-async function sha256(file: string): Promise<string> { const { createHash } = await import("node:crypto"); return createHash("sha256").update(await readFile(file)).digest("hex"); }
-export async function renderNarratedSequenceFiles(input: unknown, outputDir: string, basename: string, format: NarratedSequenceFormat): Promise<string[]> { const spec = NarratedSequenceSpecSchema.parse(input); if (!/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(basename)) throw new Error("Narrated-sequence output name must be a simple filename"); const output = await ensureDir(outputDir), rendered = renderNarratedSequenceSvg(spec), svgPath = path.join(output, `${basename}.svg`); await writeFile(svgPath, rendered.svg); const artifacts = [svgPath]; if (format === "png" || format === "all") { const png = path.join(output, `${basename}.png`); await writeFile(png, await sharp(Buffer.from(rendered.svg), { density: 192 }).resize({ width: rendered.width * 2 }).png().toBuffer()); artifacts.push(png); } if (format === "pdf" || format === "all") { const pdf = path.join(output, `${basename}.pdf`), temporary = await mkdtemp(path.join(os.tmpdir(), "artifact-narrated-sequence-")); try { await writeFile(path.join(temporary, "diagram.svg"), rendered.svg); const pageWidthMm = 420, pageHeightMm = pageWidthMm * rendered.height / rendered.width; await writeFile(path.join(temporary, "diagram.typ"), `#set page(width: ${pageWidthMm}mm, height: ${pageHeightMm.toFixed(2)}mm, margin: 0mm, fill: white)\n#place(top + left, image("diagram.svg", width: 100%, height: 100%, fit: "contain"))\n`); await run(executable("typst"), ["compile", "diagram.typ", pdf], temporary); } finally { await rm(temporary, { recursive: true, force: true }); } artifacts.push(pdf); } const report = path.join(output, `${basename}.narrated-sequence-report.json`); await writeFile(report, `${JSON.stringify({ title: spec.title, participants: spec.participants.length, steps: spec.steps.length, canvas: { width: rendered.width, height: rendered.height }, artifacts: await Promise.all(artifacts.map(async (file) => ({ path: file, bytes: (await readFile(file)).byteLength, sha256: await sha256(file) }))) }, null, 2)}\n`); return [...artifacts, report]; }
+export async function renderNarratedSequenceFiles(input: unknown, outputDir: string, basename: string, format: NarratedSequenceFormat, options: DiagramDeliveryOptions = {}): Promise<string[]> {
+  const spec = NarratedSequenceSpecSchema.parse(input);
+  if (!/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(basename)) throw new Error("Narrated-sequence output name must be a simple filename");
+  const output = await ensureDir(outputDir);
+  const rendered = renderNarratedSequenceSvg(spec);
+  const specification = specificationBytes(spec, options);
+  return deliverDiagram({
+    kind: "narrated-sequence",
+    title: spec.title,
+    outputDir: output,
+    reportName: `${basename}.narrated-sequence-report.json`,
+    specification: specification.bytes,
+    specificationRepresentation: specification.representation,
+    metadata: {
+      participants: spec.participants.length,
+      steps: spec.steps.length,
+      canvas: { width: rendered.width, height: rendered.height },
+    },
+    validation: rendered.validation,
+    build: async (stagingDir) => {
+      const candidates = [];
+      const svgName = `${basename}.svg`;
+      await writeFile(path.join(stagingDir, svgName), rendered.svg);
+      candidates.push({ name: svgName, path: path.join(stagingDir, svgName) });
+      if (format === "png" || format === "all") {
+        const pngName = `${basename}.png`;
+        await writeFile(path.join(stagingDir, pngName), await sharp(Buffer.from(rendered.svg), { density: 192 }).resize({ width: rendered.width * 2 }).png().toBuffer());
+        candidates.push({ name: pngName, path: path.join(stagingDir, pngName) });
+      }
+      if (format === "pdf" || format === "all") {
+        const pdfName = `${basename}.pdf`;
+        const temporary = await mkdtemp(path.join(os.tmpdir(), "artifact-narrated-sequence-"));
+        try {
+          await writeFile(path.join(temporary, "diagram.svg"), rendered.svg);
+          const pageWidthMm = 420;
+          const pageHeightMm = pageWidthMm * rendered.height / rendered.width;
+          await writeFile(path.join(temporary, "diagram.typ"), `#set page(width: ${pageWidthMm}mm, height: ${pageHeightMm.toFixed(2)}mm, margin: 0mm, fill: white)\n#place(top + left, image("diagram.svg", width: 100%, height: 100%, fit: "contain"))\n`);
+          await run(executable("typst"), ["compile", "diagram.typ", path.join(stagingDir, pdfName)], temporary);
+        } finally {
+          await rm(temporary, { recursive: true, force: true });
+        }
+        candidates.push({ name: pdfName, path: path.join(stagingDir, pdfName) });
+      }
+      return candidates;
+    },
+  });
+}
 export function narratedSequenceJsonSchema(): object { return z.toJSONSchema(NarratedSequenceSpecSchema, { target: "draft-2020-12" }); }
+export { DiagramDeliveryError };

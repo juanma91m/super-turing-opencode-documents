@@ -153,10 +153,14 @@ corepack pnpm --dir ~/.local/src/super-turing-opencode-documents/artifact-studio
 ## Quality gate
 
 1. Renderizar desde la fuente D2, `ServiceFlowSpec` o `NarratedSequenceSpec`; nunca editar el SVG generado a mano.
-2. Abrir el SVG o PNG y revisar conexiones, etiquetas, cortes y contraste.
-3. Publicar el documento completo.
-4. Revisar el diagrama en todas las páginas de QA del PDF y del editable.
-5. Corregir `diagram.d2` o `spec.json`, regenerar y volver a publicar.
+2. Para los specs semánticos, exigir que el receipt JSON reporte todos los checks aprobados y conservar sus hashes de fuente/artefactos.
+3. Verificar el conjunto comprometido con `artifact-verify-receipt`; incluir el `spec.json` original cuando el receipt use `source-bytes`.
+4. Ejecutar `artifact-validate` sobre el SVG canónico para medir texto, canvas y grupos semánticos con Chrome/Chromium cuando esté disponible; si no hay navegador, registrar el check como omitido.
+5. Si la entrega o verificación falla, seguir `subject`, `evidence` y `supportedFixes`; el target anterior puede ser el último resultado válido y no demuestra que el candidato rechazado haya pasado.
+6. Abrir el SVG o PNG y revisar conexiones, etiquetas, cortes y contraste. El receipt y la geometría de navegador no sustituyen esta revisión perceptual.
+7. Publicar el documento completo.
+8. Revisar el diagrama en todas las páginas de QA del PDF y del editable.
+9. Corregir `diagram.d2` o `spec.json`, regenerar y volver a publicar.
 
 Si un SVG se ve correcto en Typst pero cambia colores o rellenos en LibreOffice,
 no retocar el ODT: reemplazar la referencia del QMD por el PNG generado.

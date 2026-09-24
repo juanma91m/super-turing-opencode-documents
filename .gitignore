@@ -15,4 +15,4 @@ artifact-studio/artifacts/work/*
 !artifact-studio/artifacts/work/.gitkeep
 !documents/reference/
 !documents/reference/reference.odt
-qa/
+/qa/

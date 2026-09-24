@@ -1,0 +1,79 @@
+{
+  "version": "1.0",
+  "title": "Checkout distribuido",
+  "subtitle": "Reserva de inventario, autorización de pago y confirmación de pedido",
+  "connectors": true,
+  "lanes": [
+    {
+      "id": "channel",
+      "title": "Canal digital",
+      "components": ["Web", "API"]
+    },
+    {
+      "id": "orders",
+      "title": "Pedidos",
+      "components": ["Order Service"]
+    },
+    {
+      "id": "inventory",
+      "title": "Inventario",
+      "components": ["Stock Service"]
+    },
+    {
+      "id": "payments",
+      "title": "Pagos",
+      "components": ["Payment Gateway"]
+    }
+  ],
+  "steps": [
+    {
+      "lane": "channel",
+      "actor": "Web",
+      "text": "El cliente confirma el carrito y solicita iniciar el checkout.",
+      "code": "POST /api/checkout"
+    },
+    {
+      "lane": "channel",
+      "actor": "API",
+      "text": "Valida identidad, precios vigentes y datos de entrega."
+    },
+    {
+      "lane": "orders",
+      "actor": "Order Service",
+      "text": "Crea un pedido pendiente con una clave idempotente.",
+      "code": "POST /orders"
+    },
+    {
+      "lane": "inventory",
+      "actor": "Stock Service",
+      "text": "Reserva las unidades requeridas durante una ventana limitada.",
+      "code": "POST /reservations"
+    },
+    {
+      "lane": "payments",
+      "actor": "Payment Gateway",
+      "text": "Autoriza el importe sin capturarlo todavía.",
+      "code": "POST /payments/authorize"
+    },
+    {
+      "lane": "orders",
+      "actor": "Order Service",
+      "text": "Confirma el pedido y registra las referencias de reserva y pago."
+    },
+    {
+      "lane": "payments",
+      "actor": "Payment Gateway",
+      "text": "Captura la autorización asociada al pedido confirmado."
+    },
+    {
+      "lane": "inventory",
+      "actor": "Stock Service",
+      "text": "Convierte la reserva temporal en una deducción definitiva."
+    },
+    {
+      "lane": "channel",
+      "actor": "API",
+      "text": "Devuelve la confirmación y el identificador público del pedido."
+    }
+  ]
+}

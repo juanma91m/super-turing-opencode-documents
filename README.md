@@ -116,6 +116,10 @@ La plantilla `documents/diagrams/templates/flujo-servicios/spec.json` modela
 carriles, componentes y pasos sin coordenadas. El resultado incluye SVG
 canónico, PNG de alta resolución y PDF de una página alta. Las flechas se pueden
 activar o desactivar mediante `connectors` sin cambiar la secuencia numerada.
+La entrega se prepara en staging y reemplaza el conjunto anterior únicamente
+cuando todos los formatos y controles deterministas pasan. El archivo
+`<nombre>.service-flow-report.json` registra hashes de fuente y artefactos,
+checks, diagnósticos y evidencia de la entrega atómica.
 
 Para una secuencia técnica extensa con lifelines:
 
@@ -130,6 +134,26 @@ corepack pnpm --dir artifact-studio artifact narrated-sequence \
 La plantilla `documents/diagrams/templates/secuencia-narrada/spec.json` modela
 participantes, agrupaciones, mensajes, procesamiento interno, persistencia,
 estados y notas sin coordenadas manuales.
+Su `<nombre>.narrated-sequence-report.json` usa el mismo contrato de receipt y
+preserva el último conjunto válido si falla validación, render o commit.
+
+Para verificar posteriormente los artefactos y, opcionalmente, los bytes exactos
+del spec fuente:
+
+```bash
+corepack pnpm --dir artifact-studio artifact verify-receipt \
+  ./entrega/assets/generated/secuencia.narrated-sequence-report.json \
+  --spec ./entrega/assets/diagrams/secuencia/spec.json
+```
+
+El verificador resuelve los artefactos junto al receipt, no sigue rutas externas
+declaradas dentro del JSON y retorna exit code `1` ante archivos faltantes,
+symlinks, cambios de tamaño/hash o un contrato de receipt inválido.
+
+Como control geométrico adicional, `artifact check <diagrama.svg>` usa
+Chrome/Chromium —si está disponible— para medir bounds reales de texto, canvas y
+grupos semánticos. Este control es estructural y no sustituye la inspección
+visual del SVG/PNG/PDF.
 
 La plantilla `infografia-neon` se genera en dos pasos: primero su `diagram.png`
 con `render_diagram.py --profile neon-blueprint` y luego la lámina completa con

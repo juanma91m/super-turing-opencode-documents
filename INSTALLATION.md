@@ -47,7 +47,8 @@ Opciones:
 - `fontconfig`: detección de IBM Plex y Noto Sans;
 - `graphviz`: fallback opcional para grafos densos;
 - `google-chrome`, `chromium` o `chrome-headless-shell`: salida PNG de alta
-  resolución para diagramas; SVG no requiere esta dependencia.
+  resolución y QA geométrico real de SVG; la generación SVG no requiere esta
+  dependencia y el check de navegador se reporta como omitido si no está.
 
 Ninguna dependencia de sistema se instala silenciosamente. Si `pdftoppm` no
 está disponible, el publisher intenta generar las páginas de QA con el Typst

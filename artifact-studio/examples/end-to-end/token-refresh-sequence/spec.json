@@ -1,0 +1,28 @@
+{
+  "version": "1.0",
+  "title": "Renovación segura de sesión",
+  "subtitle": "Detección de expiración y rotación por canal servidor a servidor",
+  "participants": [
+    { "id": "user", "title": "Usuario", "kind": "actor" },
+    { "id": "app", "title": "Aplicación", "kind": "service" },
+    { "id": "gateway", "title": "Gateway", "group": "PLATAFORMA", "kind": "service" },
+    { "id": "auth", "title": "Autenticación", "group": "PLATAFORMA", "kind": "service" },
+    { "id": "sessions", "title": "Sesiones", "kind": "database" }
+  ],
+  "steps": [
+    { "from": "user", "to": "app", "kind": "navigation", "status": "existing", "text": "El usuario abre una vista protegida." },
+    { "from": "app", "to": "gateway", "kind": "message", "status": "existing", "text": "La aplicación solicita el recurso.", "code": "GET /api/private" },
+    { "from": "gateway", "to": "auth", "kind": "message", "status": "existing", "text": "Valida el access token recibido.", "code": "POST /token/introspect" },
+    { "from": "auth", "to": "sessions", "kind": "persistence", "status": "existing", "text": "Consulta la sesión y detecta expiración." },
+    { "from": "auth", "to": "gateway", "kind": "message", "status": "existing", "text": "Informa que la credencial debe renovarse." },
+    { "from": "gateway", "to": "gateway", "kind": "internal", "status": "new", "text": "Aplica la política de renovación permitida." },
+    { "from": "gateway", "to": "auth", "kind": "message", "status": "new", "text": "Solicita la renovación por backchannel.", "code": "POST /token/refresh" },
+    { "from": "auth", "to": "sessions", "kind": "persistence", "status": "new", "text": "Rota el refresh token y revoca el valor anterior." },
+    { "from": "auth", "to": "gateway", "kind": "message", "status": "new", "text": "Emite un access token de vida corta." },
+    { "from": "gateway", "to": "app", "kind": "message", "status": "existing", "text": "Completa la solicitud original sin exponer el refresh token." }
+  ],
+  "notes": [
+    "El refresh token nunca se envía al navegador en este ejemplo.",
+    "La rotación debe ser atómica para impedir reutilización."
+  ]
+}

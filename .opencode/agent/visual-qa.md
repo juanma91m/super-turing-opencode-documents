@@ -16,4 +16,4 @@ permission:
   artifact-preview: allow
   artifact-validate: allow
 ---
-Load `visual-qa` and inspect every preview page or slide. Return only structured findings with `severity` (`CRITICAL`, `MAJOR`, `MINOR`), `location`, `problem`, and `recommendedFix`. Do not edit, render, alter content or delegate.
+Load `visual-qa`, run `artifact-validate` on canonical SVG assets to collect browser-measured geometry when available, and inspect every preview page or slide. Treat browser checks as structural evidence, not as a substitute for perceptual review. Return only structured findings with `severity` (`CRITICAL`, `MAJOR`, `MINOR`), `location`, `problem`, and `recommendedFix`. Do not edit, render, alter content or delegate.

@@ -31,6 +31,7 @@ request → storyline → DocumentSpec (Zod) → charts/diagrams
 - `src/diagrams/`: safe DiagramSpec → D2 → SVG pipeline plus semantic
   ServiceFlowSpec → controlled SVG for numbered cross-service narratives.
   NarratedSequenceSpec adds controlled lifeline sequences with rich annotations.
+  Both semantic renderers use deterministic checks and atomic last-good delivery.
 - `src/renderers/`: owned Typst template, semantic PPT layouts, editable DOCX,
   and gated optional Gamma adapter.
 - `src/qa/`: OOXML/PDF checks, geometry checks, previews and contact sheets.
@@ -141,6 +142,30 @@ grouped, steps distinguish navigation, messages, self-actions and persistence,
 and each step may include lifecycle status, code and a highlighted note. The
 renderer owns lifeline geometry and produces SVG, PNG and a tall single-page PDF.
 
+`service-flow` and `narrated-sequence` render every requested format in a private
+same-directory candidate, validate SVG finiteness, accessibility, canvas bounds,
+semantic counts and mode-specific composition, then commit the complete set.
+Failures return stable diagnostics with `code`, `subject`, measured `evidence`
+and `supportedFixes`; an existing trusted output is not replaced. Their JSON
+reports bind the exact CLI source bytes and every artifact with SHA-256 hashes.
+Direct library calls without source bytes explicitly identify the receipt input
+as normalized JSON.
+
+Verify a committed semantic-diagram set with:
+
+```bash
+corepack pnpm artifact verify-receipt \
+  artifacts/output/flow.service-flow-report.json \
+  --spec examples/flow/spec.json
+```
+
+Artifact lookup is intentionally portable and contained: each declared artifact
+is resolved by filename beside the receipt, regardless of the original absolute
+output path. Verification rejects missing, modified, symbolic-link or duplicate
+artifacts and exits nonzero. `--spec` verifies exact bound bytes; omit it when no
+source file is available, or provide the canonical normalized JSON bytes for a
+receipt whose representation is `normalized-json`.
+
 ## Themes
 
 Themes centralize colors, typography, spacing, radii, borders, chart palette,
@@ -167,7 +192,8 @@ The repository-local `.opencode/` overlay provides:
   `/artifact-check`;
 - typed tools `artifact-render`, `artifact-preview`, `artifact-validate`,
   `artifact-fonts`, `artifact-service-flow`, and
-  `artifact-narrated-sequence`, restricted to the relevant rendering agents.
+  `artifact-narrated-sequence`, plus the read-only
+  `artifact-verify-receipt`, restricted to the relevant rendering agents.
 
 The addon installer maps these assets into global OpenCode directories without
 overwriting unrelated configuration. Restart OpenCode after installation.
@@ -180,6 +206,21 @@ headless profiles, then rasterized. Structural checks use qpdf when available
 inspect every page/slide for overflow, clipping, overlap, margins, typography,
 density, hierarchy, contrast and detached captions. Compilation alone is not a
 quality gate.
+
+For semantic diagrams, keep three claims separate: a delivery receipt proves
+deterministic generation and checks; generated previews provide review evidence;
+perceptual visual approval requires inspection of the actual SVG/PNG/PDF.
+
+`artifact check <diagram.svg>` adds an optional browser geometry layer. With
+Chrome or Chromium available it parses a sanitized in-memory copy of the SVG and
+measures text bounds, viewBox containment, semantic-group bounds and semantic
+overlap using the browser DOM. Without a browser it returns a `MINOR` skipped
+finding rather than turning the optional runtime into a delivery dependency.
+
+`examples/end-to-end/` contains four prompt-plus-spec scenarios for exercising
+the complete `documenter` workflow: two service flows and two narrated
+sequences. Generated outputs belong under `artifacts/work/end-to-end/` and are
+not versioned.
 
 ## Optional integrations
 

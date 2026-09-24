@@ -2,7 +2,7 @@ import { tool } from "@opencode-ai/plugin";
 import { inside, runArtifact } from "../lib/artifact-tooling";
 
 export default tool({
-  description: "Render a validated semantic service-lane flow to canonical SVG and optional PNG/PDF outputs.",
+  description: "Atomically deliver a validated semantic service-lane flow, receipt, canonical SVG and optional PNG/PDF outputs.",
   args: {
     spec: tool.schema.string().describe("ServiceFlowSpec JSON path inside the project"),
     format: tool.schema.enum(["svg", "png", "pdf", "all"]).default("all"),

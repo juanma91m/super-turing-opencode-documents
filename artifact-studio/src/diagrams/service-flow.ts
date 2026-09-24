@@ -1,10 +1,12 @@
 import path from "node:path";
 import os from "node:os";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import sharp from "sharp";
 import { z } from "zod";
 import { ensureDir, executable } from "../core/paths.js";
 import { run } from "../core/process.js";
+import { deliverDiagram, DiagramDeliveryError, specificationBytes, type DiagramDeliveryOptions } from "./delivery.js";
+import { check, errorDiagnostic, estimateTextWidth, validateSvgComposition } from "./validation.js";
 
 const IdentifierSchema = z.string().regex(/^[A-Za-z][A-Za-z0-9_-]*$/);
 const TextSchema = z.string().min(1);
@@ -91,7 +93,12 @@ function textBlock(lines: string[], x: number, y: number, options: { size: numbe
 
 interface StepLayout { x: number; y: number; width: number; height: number; laneIndex: number; textLines: string[]; codeLines: string[]; }
 
-export interface ServiceFlowRender { svg: string; width: number; height: number; }
+export interface ServiceFlowRender {
+  svg: string;
+  width: number;
+  height: number;
+  validation: ReturnType<typeof validateSvgComposition>;
+}
 
 export function renderServiceFlowSvg(input: unknown): ServiceFlowRender {
   const spec = ServiceFlowSpecSchema.parse(input);
@@ -192,56 +199,114 @@ export function renderServiceFlowSvg(input: unknown): ServiceFlowRender {
     parts.push("</g>");
   });
   parts.push("</svg>");
-  return { svg: `${parts.join("\n")}\n`, width, height };
+  const svg = `${parts.join("\n")}\n`;
+  const diagnostics = [];
+  for (const lane of spec.lanes) {
+    const availableWidth = actualLaneWidth - 32;
+    const labels = [{ role: "title", value: lane.title.toUpperCase(), fontSize: 17 }, ...lane.components.map((value) => ({ role: "component", value, fontSize: 14 }))];
+    for (const label of labels) {
+      const estimatedWidth = estimateTextWidth(label.value, label.fontSize);
+      if (estimatedWidth > availableWidth) diagnostics.push(errorDiagnostic(
+        "composition/label-fit",
+        "A service-lane label exceeds its available width.",
+        { lane: lane.id, label: label.role },
+        { text: label.value, estimatedWidth: Math.round(estimatedWidth), availableWidth: Math.round(availableWidth) },
+        ["shorten the semantic label or move supporting detail into the step narrative"],
+      ));
+    }
+  }
+  const overlapPairs: string[] = [];
+  for (let left = 0; left < layouts.length; left += 1) {
+    for (let right = left + 1; right < layouts.length; right += 1) {
+      const a = layouts[left];
+      const b = layouts[right];
+      if (a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y) {
+        overlapPairs.push(`${left + 1}:${right + 1}`);
+      }
+    }
+  }
+  if (overlapPairs.length) diagnostics.push(errorDiagnostic(
+    "composition/step-overlap",
+    "Two numbered service-flow steps overlap.",
+    { diagram: "service-flow" },
+    { pairs: overlapPairs },
+    ["reduce step density or split the flow into phases"],
+  ));
+  const connectorCount = svg.match(/class="service-flow-connector"/g)?.length ?? 0;
+  const expectedConnectors = spec.connectors ? Math.max(0, layouts.length - 1) : 0;
+  const validation = validateSvgComposition({
+    kind: "service-flow",
+    svg,
+    width,
+    height,
+    semanticClass: "service-flow-step",
+    expectedSemanticCount: spec.steps.length,
+    extraChecks: [
+      check("label_fit", !diagnostics.some((entry) => entry.code === "composition/label-fit")),
+      check("step_overlap", overlapPairs.length === 0),
+      check("connector_count", connectorCount === expectedConnectors, [`${connectorCount}/${expectedConnectors} connectors`]),
+    ],
+    extraDiagnostics: connectorCount === expectedConnectors ? diagnostics : [...diagnostics, errorDiagnostic(
+      "artifact/connector-count",
+      "The generated SVG does not contain the expected number of connectors.",
+      { diagram: "service-flow" },
+      { expected: expectedConnectors, actual: connectorCount },
+      ["restore renderer-owned connectors and regenerate"],
+    )],
+  });
+  return { svg, width, height, validation };
 }
 
-async function sha256(file: string): Promise<string> {
-  const { createHash } = await import("node:crypto");
-  return createHash("sha256").update(await readFile(file)).digest("hex");
-}
-
-export async function renderServiceFlowFiles(input: unknown, outputDir: string, basename: string, format: ServiceFlowFormat): Promise<string[]> {
+export async function renderServiceFlowFiles(input: unknown, outputDir: string, basename: string, format: ServiceFlowFormat, options: DiagramDeliveryOptions = {}): Promise<string[]> {
   const spec = ServiceFlowSpecSchema.parse(input);
   if (!/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(basename)) throw new Error("Service-flow output name must be a simple filename");
   const output = await ensureDir(outputDir);
   const rendered = renderServiceFlowSvg(spec);
-  const svgPath = path.join(output, `${basename}.svg`);
-  await writeFile(svgPath, rendered.svg);
-  const artifacts = [svgPath];
-
-  if (format === "png" || format === "all") {
-    const pngPath = path.join(output, `${basename}.png`);
-    await writeFile(pngPath, await sharp(Buffer.from(rendered.svg), { density: 192 }).resize({ width: rendered.width * 2 }).png().toBuffer());
-    artifacts.push(pngPath);
-  }
-
-  if (format === "pdf" || format === "all") {
-    const pdfPath = path.join(output, `${basename}.pdf`);
-    const temporary = await mkdtemp(path.join(os.tmpdir(), "artifact-service-flow-"));
-    try {
-      await writeFile(path.join(temporary, "diagram.svg"), rendered.svg);
-      const pageWidthMm = 300;
-      const pageHeightMm = pageWidthMm * rendered.height / rendered.width;
-      await writeFile(path.join(temporary, "diagram.typ"), `#set page(width: ${pageWidthMm}mm, height: ${pageHeightMm.toFixed(2)}mm, margin: 0mm, fill: white)\n#place(top + left, image("diagram.svg", width: 100%, height: 100%, fit: "contain"))\n`);
-      await run(executable("typst"), ["compile", "diagram.typ", pdfPath], temporary);
-    } finally {
-      await rm(temporary, { recursive: true, force: true });
-    }
-    artifacts.push(pdfPath);
-  }
-
-  const reportPath = path.join(output, `${basename}.service-flow-report.json`);
-  await writeFile(reportPath, `${JSON.stringify({
+  const specification = specificationBytes(spec, options);
+  return deliverDiagram({
+    kind: "service-flow",
     title: spec.title,
-    lanes: spec.lanes.length,
-    steps: spec.steps.length,
-    connectors: spec.connectors,
-    canvas: { width: rendered.width, height: rendered.height },
-    artifacts: await Promise.all(artifacts.map(async (file) => ({ path: file, bytes: (await readFile(file)).byteLength, sha256: await sha256(file) }))),
-  }, null, 2)}\n`);
-  artifacts.push(reportPath);
-  return artifacts;
+    outputDir: output,
+    reportName: `${basename}.service-flow-report.json`,
+    specification: specification.bytes,
+    specificationRepresentation: specification.representation,
+    metadata: {
+      lanes: spec.lanes.length,
+      steps: spec.steps.length,
+      connectors: spec.connectors,
+      canvas: { width: rendered.width, height: rendered.height },
+    },
+    validation: rendered.validation,
+    build: async (stagingDir) => {
+      const candidates = [];
+      const svgName = `${basename}.svg`;
+      await writeFile(path.join(stagingDir, svgName), rendered.svg);
+      candidates.push({ name: svgName, path: path.join(stagingDir, svgName) });
+      if (format === "png" || format === "all") {
+        const pngName = `${basename}.png`;
+        await writeFile(path.join(stagingDir, pngName), await sharp(Buffer.from(rendered.svg), { density: 192 }).resize({ width: rendered.width * 2 }).png().toBuffer());
+        candidates.push({ name: pngName, path: path.join(stagingDir, pngName) });
+      }
+      if (format === "pdf" || format === "all") {
+        const pdfName = `${basename}.pdf`;
+        const temporary = await mkdtemp(path.join(os.tmpdir(), "artifact-service-flow-"));
+        try {
+          await writeFile(path.join(temporary, "diagram.svg"), rendered.svg);
+          const pageWidthMm = 300;
+          const pageHeightMm = pageWidthMm * rendered.height / rendered.width;
+          await writeFile(path.join(temporary, "diagram.typ"), `#set page(width: ${pageWidthMm}mm, height: ${pageHeightMm.toFixed(2)}mm, margin: 0mm, fill: white)\n#place(top + left, image("diagram.svg", width: 100%, height: 100%, fit: "contain"))\n`);
+          await run(executable("typst"), ["compile", "diagram.typ", path.join(stagingDir, pdfName)], temporary);
+        } finally {
+          await rm(temporary, { recursive: true, force: true });
+        }
+        candidates.push({ name: pdfName, path: path.join(stagingDir, pdfName) });
+      }
+      return candidates;
+    },
+  });
 }
+
+export { DiagramDeliveryError };
 
 export function serviceFlowJsonSchema(): object {
   return z.toJSONSchema(ServiceFlowSpecSchema, { target: "draft-2020-12" });

@@ -1,0 +1,68 @@
+{
+  "version": "1.0",
+  "title": "Respuesta a incidente",
+  "subtitle": "Coordinación operativa desde la detección hasta el cierre",
+  "connectors": false,
+  "lanes": [
+    {
+      "id": "observability",
+      "title": "Observabilidad",
+      "components": ["Alertas", "Métricas"]
+    },
+    {
+      "id": "oncall",
+      "title": "Guardia técnica",
+      "components": ["On-call"]
+    },
+    {
+      "id": "platform",
+      "title": "Plataforma",
+      "components": ["Aplicación", "Infraestructura"]
+    },
+    {
+      "id": "communication",
+      "title": "Comunicación",
+      "components": ["Status Page"]
+    }
+  ],
+  "steps": [
+    {
+      "lane": "observability",
+      "text": "Detecta una degradación sostenida y agrupa señales relacionadas."
+    },
+    {
+      "lane": "oncall",
+      "actor": "On-call",
+      "text": "Confirma impacto, severidad y alcance inicial del incidente."
+    },
+    {
+      "lane": "platform",
+      "actor": "Aplicación",
+      "text": "Correlaciona logs y trazas con el último cambio desplegado."
+    },
+    {
+      "lane": "communication",
+      "actor": "Status Page",
+      "text": "Publica una actualización breve con impacto y próxima revisión."
+    },
+    {
+      "lane": "platform",
+      "actor": "Infraestructura",
+      "text": "Aplica la mitigación reversible y monitorea la recuperación."
+    },
+    {
+      "lane": "observability",
+      "text": "Verifica que latencia, errores y saturación vuelvan al rango esperado."
+    },
+    {
+      "lane": "oncall",
+      "actor": "On-call",
+      "text": "Declara el servicio estabilizado y conserva evidencia para el análisis."
+    },
+    {
+      "lane": "communication",
+      "actor": "Status Page",
+      "text": "Comunica la recuperación y enlaza el seguimiento posterior."
+    }
+  ]
+}

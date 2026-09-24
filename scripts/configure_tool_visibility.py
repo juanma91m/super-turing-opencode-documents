@@ -14,6 +14,7 @@ TOOL_NAMES = (
     "artifact-fonts",
     "artifact-service-flow",
     "artifact-narrated-sequence",
+    "artifact-verify-receipt",
 )
 STATE_FILENAME = ".opencode-documents-tool-visibility.json"
 

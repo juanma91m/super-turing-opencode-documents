@@ -1,0 +1,30 @@
+{
+  "version": "1.0",
+  "title": "Saga de confirmación de pedido",
+  "subtitle": "Interacción ilustrativa con reserva, pago y confirmación",
+  "participants": [
+    { "id": "customer", "title": "Cliente", "kind": "actor" },
+    { "id": "web", "title": "Aplicación web", "group": "CANAL DIGITAL", "kind": "service" },
+    { "id": "api", "title": "API", "group": "CANAL DIGITAL", "kind": "service" },
+    { "id": "orders", "title": "Pedidos", "kind": "service" },
+    { "id": "inventory", "title": "Inventario", "kind": "service" },
+    { "id": "payments", "title": "Pagos", "kind": "service" }
+  ],
+  "steps": [
+    { "from": "customer", "to": "web", "kind": "navigation", "status": "existing", "text": "El cliente confirma el carrito." },
+    { "from": "web", "to": "api", "kind": "message", "status": "new", "text": "La aplicación inicia el checkout.", "code": "POST /api/checkout" },
+    { "from": "api", "to": "api", "kind": "internal", "status": "new", "text": "La API valida precios, identidad e idempotencia." },
+    { "from": "api", "to": "orders", "kind": "message", "status": "new", "text": "Crea el pedido en estado pendiente.", "code": "POST /orders" },
+    { "from": "orders", "to": "inventory", "kind": "persistence", "status": "new", "text": "Solicita una reserva temporal de stock.", "code": "POST /reservations" },
+    { "from": "inventory", "to": "orders", "kind": "message", "status": "existing", "text": "Confirma la reserva y su vencimiento." },
+    { "from": "orders", "to": "payments", "kind": "message", "status": "configuration", "text": "Solicita autorización del importe.", "code": "POST /payments/authorize", "note": "El proveedor de pagos es configurable." },
+    { "from": "payments", "to": "orders", "kind": "message", "status": "existing", "text": "Devuelve la referencia de autorización." },
+    { "from": "orders", "to": "orders", "kind": "internal", "status": "new", "text": "Confirma el pedido de forma idempotente." },
+    { "from": "orders", "to": "api", "kind": "message", "status": "new", "text": "Informa el pedido confirmado." },
+    { "from": "api", "to": "web", "kind": "message", "status": "existing", "text": "Devuelve el identificador público del pedido." }
+  ],
+  "notes": [
+    "Los endpoints y estados son ilustrativos.",
+    "Las compensaciones no forman parte de este ejemplo."
+  ]
+}
