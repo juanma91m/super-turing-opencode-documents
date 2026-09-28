@@ -7,13 +7,16 @@
 - `python3`;
 - `curl`;
 - `tar`;
-- `sha256sum`.
+- `sha256sum`;
 - Node.js 22 LTS o superior;
-- `corepack` (pnpm se fija en el lockfile).
+- `npm` y `corepack` (npm instala el canvas desde lockfile; pnpm se fija para
+  Artifact Studio).
 
-El installer descarga y verifica versiones fijadas de Quarto y D2. Quarto
-incluye los ejecutables de Pandoc y Typst utilizados por el pipeline; D2 genera
-los diagramas vectoriales. El installer ejecuta además `pnpm install
+El installer descarga y verifica versiones fijadas de Quarto y D2. Además
+instala `mcp-excalidraw-server` 2.0.0 desde un lockfile con integridades npm y
+scripts de instalación deshabilitados. Quarto incluye los ejecutables de Pandoc
+y Typst utilizados por el pipeline; D2 genera los diagramas vectoriales. El
+installer ejecuta además `pnpm install
 --frozen-lockfile` para Artifact Studio y solo permite scripts de build
 auditados (`esbuild`, `sharp`).
 
@@ -32,7 +35,7 @@ Opciones:
 ```text
 --target-dir <path>    Config global destino
 --runtime-dir <path>   Runtime user-space administrado
---assets-only          Instalar assets sin descargar runtime
+--assets-only          Instalar assets sin descargar/instalar runtimes
 --dry-run              Mostrar acciones sin escribir
 --no-validate          Omitir opencode debug config
 ```
@@ -74,5 +77,7 @@ bash scripts/status.sh
 Para una prueba real de publicación:
 
 ```bash
+bash tests/test_lifecycle.sh
+node --experimental-strip-types tests/test_excalidraw_tooling.mjs
 bash tests/test_publish.sh
 ```

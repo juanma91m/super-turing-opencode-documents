@@ -10,6 +10,7 @@ multiformato vive en [Artifact Studio](./artifact-studio/README.md).
 - comando `/publicar-documento`;
 - plantillas `trabajo-practico` e `informe-profesional`;
 - skill `diagramacion-tecnica` y comando `/crear-diagrama`;
+- canvas Excalidraw local editable mediante `/canvas`, con skill y tool acotada;
 - runtime Quarto fijado e instalado en user-space;
 - runtime D2 fijado para flujos, procesos y arquitecturas reproducibles;
 - renderer semántico SVG para flujos numerados entre servicios;
@@ -28,6 +29,9 @@ Las tools `artifact-*` se ocultan globalmente: solo `documenter` y
 `artifact-renderer` acceden al conjunto completo, incluido
 `artifact-service-flow` y `artifact-narrated-sequence`, mientras `visual-qa`
 recibe únicamente preview y validación.
+La tool `excalidraw-canvas` también se oculta globalmente y se habilita solo en
+`documenter`; opera un runtime Node pineado bajo demanda, limitado a
+`127.0.0.1:3000` y a archivos dentro del proyecto activo.
 
 El PDF es el artefacto canónico. DOCX y ODT son acompañantes editables y no se
 promete paridad visual exacta entre motores.
@@ -70,7 +74,8 @@ El runtime se instala, por defecto, bajo:
 ~/.local/share/super-turing-opencode-documents/runtime/
 ```
 
-No requiere `sudo` y no reemplaza instalaciones globales de Quarto o D2.
+Incluye links administrados para Quarto, D2 y Excalidraw Canvas. No requiere
+`sudo` y no reemplaza instalaciones globales de esas herramientas.
 
 ## Uso
 
@@ -101,6 +106,30 @@ python3 ~/.config/opencode/scripts/render_diagram.py \
 
 Usar `--profile poster-dark` para una lámina técnica oscura y `--format both`
 cuando también se requiera PNG de alta resolución.
+
+Para un diagrama editable e iterativo:
+
+```text
+/canvas arquitectura de la aplicación con frontend, API y PostgreSQL
+```
+
+El comando inicia bajo demanda un canvas en `http://127.0.0.1:3000`. La escena
+de trabajo vive en memoria: antes de cerrar se exporta una fuente
+`.excalidraw` dentro del proyecto y, cuando haga falta, un PNG/SVG derivado.
+No se expone la operación externa de share.
+La integración usa el proyecto MIT
+[`yctimlin/mcp_excalidraw`](https://github.com/yctimlin/mcp_excalidraw); el
+addon fija la versión y conserva su runtime separado del código propio.
+
+### Frontera de seguridad del canvas
+
+El runtime upstream pineado contiene advisories transitivos de npm en librerías
+de Excalidraw/Mermaid sin upgrade compatible disponible en esa release. Por eso
+esta integración lo trata como workbench local de confianza: bind exclusivo a
+loopback, tool visible solo para `documenter`, paths confinados al worktree y
+sin operaciones de Mermaid ni share. No importar escenas no confiables ni
+exponer el puerto en red; actualizar el pin cuando upstream publique una línea
+compatible que resuelva esos advisories.
 
 Para un flujo numerado entre servicios:
 

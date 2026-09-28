@@ -4,7 +4,7 @@ set -euo pipefail
 
 failed=0
 
-for dependency in bash python3 curl tar sha256sum uname realpath node corepack; do
+for dependency in bash python3 curl tar sha256sum uname realpath node npm corepack; do
   if ! command -v "$dependency" >/dev/null 2>&1; then
     printf '[documents-addon][preflight] missing required command: %s\n' "$dependency" >&2
     failed=1

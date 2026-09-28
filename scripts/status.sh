@@ -61,6 +61,13 @@ if d2_present:
         [str(d2), "--version"], check=False, text=True, capture_output=True
     ).stdout.strip().removeprefix("v")
 d2_expected_version = data["diagramRuntime"]["version"]
+canvas = runtime_dir / "excalidraw-current/node_modules/.bin/mcp-excalidraw-server"
+canvas_present = canvas.is_file() and canvas.stat().st_mode & 0o111
+canvas_expected_version = data["canvasRuntime"]["version"]
+canvas_package = runtime_dir / "excalidraw-current/node_modules/mcp-excalidraw-server/package.json"
+canvas_actual_version = ""
+if canvas_present and canvas_package.is_file():
+    canvas_actual_version = json.loads(canvas_package.read_text()).get("version", "")
 marker = target_dir / ".opencode-documents-addon.json"
 legacy_backup_dir = target_dir / ".documents-addon-backups"
 studio_ready = (repo_dir / data["artifactStudio"]["path"] / "node_modules/.modules.yaml").is_file()
@@ -74,6 +81,9 @@ print(f"runtime_actual_version={actual_version or 'missing'}")
 print(f"diagram_runtime_present={'yes' if d2_present else 'no'}")
 print(f"diagram_runtime_expected_version={d2_expected_version}")
 print(f"diagram_runtime_actual_version={d2_actual_version or 'missing'}")
+print(f"canvas_runtime_present={'yes' if canvas_present else 'no'}")
+print(f"canvas_runtime_expected_version={canvas_expected_version}")
+print(f"canvas_runtime_actual_version={canvas_actual_version or 'missing'}")
 print(f"managed_files_missing={len(missing)}")
 print(f"managed_files_mismatched={len(mismatched)}")
 print(f"obsolete_targets_present={len(obsolete)}")
@@ -89,5 +99,6 @@ for rel in obsolete:
 healthy_assets = not missing and not mismatched and not obsolete and marker.is_file() and studio_ready and not legacy_backup_dir.exists()
 healthy_runtime = runtime_present and actual_version == expected_version
 healthy_diagram_runtime = d2_present and d2_actual_version == d2_expected_version
-raise SystemExit(0 if healthy_assets and healthy_runtime and healthy_diagram_runtime else 1)
+healthy_canvas_runtime = canvas_present and canvas_actual_version == canvas_expected_version
+raise SystemExit(0 if healthy_assets and healthy_runtime and healthy_diagram_runtime and healthy_canvas_runtime else 1)
 PY

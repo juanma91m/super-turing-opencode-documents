@@ -14,13 +14,18 @@ apto para publicación, conservando la fuente textual junto al documento.
 
 - usar **D2** para flujos, procesos, dependencias y arquitecturas que deban
   funcionar igual en PDF, DOCX y ODT;
+- usar **Excalidraw Canvas** cuando el usuario necesite un workbench visual
+  editable, iteración manual en navegador o una fuente `.excalidraw`; exportar
+  esa fuente antes de cerrar y conservar D2/Artifact Studio para publicación
+  determinista;
 - aceptar Mermaid para borradores o documentos solo PDF/HTML, pero preferir un
   asset D2 pre-renderizado cuando se entregue un editable;
 - usar Graphviz solo para grafos densos donde su algoritmo aporte una ventaja;
 - usar una composición Typst/SVG adicional para láminas con tarjetas, métricas
   y narrativa: un diagrama por sí solo no reemplaza una infografía editorial.
 
-No usar capturas manuales de editores como fuente canónica.
+No usar capturas manuales de editores como fuente canónica. En Excalidraw, la
+fuente es el archivo `.excalidraw`; PNG/SVG son derivados de entrega o QA.
 
 ## Plantillas
 

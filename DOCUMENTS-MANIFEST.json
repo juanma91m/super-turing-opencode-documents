@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "documents",
-  "version": "1.0.6",
+  "version": "1.1.0",
   "artifactStudio": {
     "path": "artifact-studio",
     "node": ">=22",
@@ -22,6 +22,14 @@
     "asset": "d2-v0.7.1-linux-amd64.tar.gz",
     "url": "https://github.com/d2lang/d2/releases/download/v0.7.1/d2-v0.7.1-linux-amd64.tar.gz",
     "sha256": "eb172adf59f38d1e5a70ab177591356754ffaf9bebb84e0ca8b767dfb421dad7"
+  },
+  "canvasRuntime": {
+    "name": "mcp-excalidraw-server",
+    "version": "2.0.0",
+    "package": "mcp-excalidraw-server",
+    "integrity": "sha512-aBzC2Mbb7XSVoiIC0SSZh2728Z59H82sXzTe8pn1o9fLVedPBecgYhuDxrtsPpVT7Njh3Spb0b/k40R5Jjk8Xg==",
+    "host": "127.0.0.1",
+    "port": 3000
   },
   "managedFiles": [
     "commands/publicar-documento.md",

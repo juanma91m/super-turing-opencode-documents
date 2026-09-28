@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.1.0
+
+- Agrega un canvas Excalidraw editable y local para iteración visual con agentes,
+  basado en `mcp-excalidraw-server` 2.0.0 pineado por lockfile.
+- Incorpora `/canvas`, la skill `excalidraw-canvas` y una custom tool única,
+  oculta globalmente y habilitada solo para `documenter`.
+- Limita el servidor a `127.0.0.1:3000`, restringe import/export al worktree y
+  no expone las operaciones de Mermaid ni share; documenta advisories
+  transitivos del runtime upstream y su frontera local de confianza.
+- Mantiene D2 y los specs semánticos como flujo determinista de publicación;
+  el canvas exige exportar una fuente `.excalidraw` durable antes de cerrar.
+
 ## 1.0.6
 
 - Agrega entrega transaccional last-good y receipts SHA-256 para

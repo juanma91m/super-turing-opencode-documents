@@ -19,6 +19,11 @@ Para `infografia-neon`, renderizá primero `diagram.png` y después ejecutá
 
 No entregues únicamente una captura ni edites a mano el asset generado.
 
+Si el usuario pide explícitamente un canvas editable o iteración visual manual,
+usá `/canvas` y la skill `excalidraw-canvas`; exportá la fuente `.excalidraw`
+dentro del proyecto. No uses Excalidraw como reemplazo implícito del pipeline
+determinista de publicación.
+
 Para un flujo numerado por columnas, usá la plantilla `flujo-servicios`, editá
 su `spec.json` sin agregar coordenadas y renderizá con `artifact-service-flow`
 cuando estés operando como `documenter`; el SVG es canónico y el PDF alto sirve

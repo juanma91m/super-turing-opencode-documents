@@ -15,6 +15,7 @@ TOOL_NAMES = (
     "artifact-service-flow",
     "artifact-narrated-sequence",
     "artifact-verify-receipt",
+    "excalidraw-canvas",
 )
 STATE_FILENAME = ".opencode-documents-tool-visibility.json"
 

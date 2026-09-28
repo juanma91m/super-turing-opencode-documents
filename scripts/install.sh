@@ -18,7 +18,7 @@ Usage: bash scripts/install.sh [options]
 
 Options:
   --target-dir <path>    Target OpenCode config dir (default: ~/.config/opencode)
-  --runtime-dir <path>   Managed Quarto and D2 runtime root
+  --runtime-dir <path>   Managed Quarto, D2 and Excalidraw runtime root
   --assets-only          Copy assets without downloading the runtime
   --dry-run              Show actions without changing files
   --no-validate          Skip opencode debug config
@@ -246,6 +246,76 @@ install_diagram_runtime() {
   log "D2 $version installed in $version_dir"
 }
 
+install_canvas_runtime() {
+  local version package expected_integrity lock_version lock_integrity version_dir current_link binary actual_version temp_dir
+  version="$(manifest_value canvasRuntime.version)"
+  package="$(manifest_value canvasRuntime.package)"
+  expected_integrity="$(manifest_value canvasRuntime.integrity)"
+  IFS=$'\t' read -r lock_version lock_integrity < <(
+    python3 - "$REPO_DIR/canvas-runtime/package-lock.json" "$package" <<'PY'
+import json
+import pathlib
+import sys
+
+data = json.loads(pathlib.Path(sys.argv[1]).read_text())
+entry = data["packages"][f"node_modules/{sys.argv[2]}"]
+print(f"{entry['version']}\t{entry['integrity']}")
+PY
+  )
+  [[ "$lock_version" == "$version" && "$lock_integrity" == "$expected_integrity" ]] || {
+    printf 'Excalidraw lock metadata does not match DOCUMENTS-MANIFEST.json\n' >&2
+    exit 1
+  }
+  version_dir="$RUNTIME_DIR/excalidraw-$version"
+  current_link="$RUNTIME_DIR/excalidraw-current"
+  binary="$version_dir/node_modules/.bin/mcp-excalidraw-server"
+
+  if [[ "$ASSETS_ONLY" -eq 1 ]]; then
+    log 'Assets-only mode: managed Excalidraw canvas runtime was not installed'
+    return 0
+  fi
+
+  if [[ -x "$binary" ]]; then
+    actual_version="$(node -p "require('$version_dir/node_modules/$package/package.json').version")"
+    if [[ "$actual_version" == "$version" ]]; then
+      log "Excalidraw canvas $version is already installed in $version_dir"
+      run mkdir -p "$RUNTIME_DIR"
+      run ln -sfn "excalidraw-$version" "$current_link"
+      return 0
+    fi
+    printf 'Existing managed Excalidraw version mismatch in %s: expected %s, got %s\n' "$version_dir" "$version" "$actual_version" >&2
+    exit 1
+  fi
+  if [[ -e "$version_dir" ]]; then
+    printf 'Existing managed Excalidraw runtime is incomplete: %s\n' "$version_dir" >&2
+    exit 1
+  fi
+
+  if [[ "$DRY_RUN" -eq 1 ]]; then
+    log "Dry-run: would install locked $package $version in $version_dir"
+    return 0
+  fi
+
+  mkdir -p "$RUNTIME_DIR"
+  temp_dir="$(mktemp -d "$RUNTIME_DIR/.excalidraw-$version.XXXXXX")"
+  trap 'rm -rf "$temp_dir"' RETURN
+  cp "$REPO_DIR/canvas-runtime/package.json" "$REPO_DIR/canvas-runtime/package-lock.json" "$temp_dir/"
+  npm ci --prefix "$temp_dir" --omit=dev --ignore-scripts --no-audit --no-fund
+  [[ -x "$temp_dir/node_modules/.bin/mcp-excalidraw-server" ]] || {
+    printf 'Locked Excalidraw install produced no executable\n' >&2
+    exit 1
+  }
+  actual_version="$(node -p "require('$temp_dir/node_modules/$package/package.json').version")"
+  [[ "$actual_version" == "$version" ]] || {
+    printf 'Installed Excalidraw version mismatch: expected %s, got %s\n' "$version" "$actual_version" >&2
+    exit 1
+  }
+  mv "$temp_dir" "$version_dir"
+  ln -sfn "excalidraw-$version" "$current_link"
+  trap - RETURN
+  log "Excalidraw canvas $version installed in $version_dir"
+}
+
 copy_assets() {
   local timestamp backup_dir mapping source_rel target_rel src dst
   timestamp="$(date +%Y%m%d-%H%M%S)"
@@ -266,23 +336,25 @@ copy_assets() {
 
 write_marker() {
   local marker="$TARGET_DIR/.opencode-documents-addon.json"
-  local version runtime_version runtime_path diagram_version diagram_path
+  local version runtime_version runtime_path diagram_version diagram_path canvas_version canvas_path
   version="$(manifest_value version)"
   runtime_version="$(manifest_value runtime.version)"
   runtime_path="$RUNTIME_DIR/current/bin/quarto"
   diagram_version="$(manifest_value diagramRuntime.version)"
   diagram_path="$RUNTIME_DIR/d2-current/bin/d2"
+  canvas_version="$(manifest_value canvasRuntime.version)"
+  canvas_path="$RUNTIME_DIR/excalidraw-current/node_modules/.bin/mcp-excalidraw-server"
   if [[ "$DRY_RUN" -eq 1 ]]; then
     log "Dry-run: would write $marker"
     return 0
   fi
-  python3 - "$marker" "$REPO_DIR" "$version" "$runtime_version" "$runtime_path" "$diagram_version" "$diagram_path" "$ASSETS_ONLY" <<'PY'
+  python3 - "$marker" "$REPO_DIR" "$version" "$runtime_version" "$runtime_path" "$diagram_version" "$diagram_path" "$canvas_version" "$canvas_path" "$ASSETS_ONLY" <<'PY'
 import datetime
 import json
 import pathlib
 import sys
 
-marker, repo, version, runtime_version, runtime_path, diagram_version, diagram_path, assets_only = sys.argv[1:]
+marker, repo, version, runtime_version, runtime_path, diagram_version, diagram_path, canvas_version, canvas_path, assets_only = sys.argv[1:]
 payload = {
     "addonId": "documents",
     "version": version,
@@ -299,6 +371,13 @@ payload = {
         "name": "d2",
         "version": diagram_version,
         "path": diagram_path,
+    },
+    "canvasRuntime": {
+        "managed": assets_only == "0",
+        "name": "mcp-excalidraw-server",
+        "version": canvas_version,
+        "path": canvas_path,
+        "url": "http://127.0.0.1:3000",
     },
 }
 path = pathlib.Path(marker)
@@ -349,6 +428,7 @@ log "Target dir: $TARGET_DIR"
 log "Runtime dir: $RUNTIME_DIR"
 install_runtime
 install_diagram_runtime
+install_canvas_runtime
 install_artifact_studio
 remove_obsolete_targets
 copy_assets

@@ -1,0 +1,9 @@
+{
+  "name": "super-turing-opencode-documents-canvas-runtime",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Pinned runtime for the optional Excalidraw live canvas integration.",
+  "dependencies": {
+    "mcp-excalidraw-server": "2.0.0"
+  }
+}
