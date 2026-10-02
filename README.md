@@ -33,6 +33,12 @@ La tool `excalidraw-canvas` también se oculta globalmente y se habilita solo en
 `documenter`; opera un runtime Node pineado bajo demanda, limitado a
 `127.0.0.1:3000` y a archivos dentro del proyecto activo.
 
+Cuando está instalada la integración opcional Atlassian Rovo MCP v2,
+`documenter` puede leer y actualizar una página Confluence existente con los
+permisos del usuario autenticado. La allowlist excluye creación, borrado,
+restricciones, espacios y escritura Jira; cada actualización remota conserva
+confirmación interactiva.
+
 El PDF es el artefacto canónico. DOCX y ODT son acompañantes editables y no se
 promete paridad visual exacta entre motores.
 

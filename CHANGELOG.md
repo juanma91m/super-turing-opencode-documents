@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.1
+
+- Habilita en `documenter` lectura y actualización acotada de documentos
+  Confluence mediante Atlassian Rovo MCP v2.
+- Mantiene las mutaciones remotas bajo confirmación interactiva y no expone
+  creación, borrado, permisos, administración de espacios ni escritura Jira.
+
 ## 1.1.0
 
 - Agrega un canvas Excalidraw editable y local para iteración visual con agentes,
