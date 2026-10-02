@@ -34,9 +34,12 @@ La tool `excalidraw-canvas` también se oculta globalmente y se habilita solo en
 `127.0.0.1:3000` y a archivos dentro del proyecto activo.
 
 Cuando está instalada la integración opcional Atlassian Rovo MCP v2,
-`documenter` puede leer y actualizar una página Confluence existente con los
-permisos del usuario autenticado. La allowlist excluye creación, borrado,
-restricciones, espacios y escritura Jira; cada actualización remota conserva
+`documenter` puede leer, crear bajo un padre explícito y actualizar páginas
+Confluence con los permisos del usuario autenticado. `createConfluenceContent`
+también soporta otros tipos de contenido del lado de Atlassian, por lo que la
+restricción a páginas es un guardrail del agente, no una capacidad separada del
+MCP. Borrado, restricciones, administración de espacios y escritura Jira siguen
+fuera de la allowlist; cada creación o actualización remota conserva
 confirmación interactiva.
 
 El PDF es el artefacto canónico. DOCX y ODT son acompañantes editables y no se

@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.2
+
+- Habilita en `documenter` la creación de páginas Confluence bajo un padre
+  explícito mediante `createConfluenceContent`.
+- Conserva confirmación interactiva, restringe por prompt la tool genérica a
+  páginas y mantiene fuera de la allowlist borrado, restricciones, espacios y
+  escritura Jira.
+
 ## 1.1.1
 
 - Habilita en `documenter` lectura y actualización acotada de documentos
